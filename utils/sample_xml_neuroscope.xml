@@ -1,0 +1,302 @@
+<?xml version='1.0' encoding='utf-8'?>
+<parameters version="1.0" creator="neuroscope-2.0.0">
+ <generalInfo>
+  <date></date>
+ </generalInfo>
+ <acquisitionSystem>
+  <nBits>16</nBits>
+  <nChannels>385</nChannels>
+  <samplingRate>30000</samplingRate>
+  <voltageRange>20</voltageRange>
+  <amplification>1000</amplification>
+  <offset>0</offset>
+ </acquisitionSystem>
+ <fieldPotentials>
+  <lfpSamplingRate>2500</lfpSamplingRate>
+ </fieldPotentials>
+ <files>
+  <file>
+   <extension>lf.bin</extension>
+   <samplingRate>2500</samplingRate>
+  </file>
+ </files>
+ <anatomicalDescription>
+  <channelGroups>
+   <group>
+    <channel skip="0">0</channel>
+    <channel skip="0">1</channel>
+    <channel skip="0">2</channel>
+    <channel skip="0">3</channel>
+    <channel skip="0">4</channel>
+    <channel skip="0">5</channel>
+   </group>
+   <group>
+    <channel skip="0">6</channel>
+    <channel skip="0">7</channel>
+    <channel skip="0">8</channel>
+    <channel skip="0">9</channel>
+   </group>
+   <group>
+    <channel skip="0">10</channel>
+    <channel skip="0">11</channel>
+   </group>
+   <group>
+    <channel skip="0">12</channel>
+    <channel skip="0">13</channel>
+    <channel skip="0">14</channel>
+   </group>
+   <group>
+    <channel skip="0">15</channel>
+    <channel skip="0">16</channel>
+    <channel skip="0">17</channel>
+    <channel skip="0">18</channel>
+    <channel skip="0">19</channel>
+   </group>
+   <group>
+    <channel skip="0">20</channel>
+    <channel skip="0">21</channel>
+    <channel skip="0">22</channel>
+    <channel skip="0">23</channel>
+    <channel skip="0">24</channel>
+    <channel skip="0">25</channel>
+   </group>
+   <group>
+    <channel skip="0">26</channel>
+    <channel skip="0">27</channel>
+    <channel skip="0">28</channel>
+    <channel skip="0">29</channel>
+   </group>
+   <group>
+    <channel skip="0">30</channel>
+    <channel skip="0">31</channel>
+    <channel skip="0">32</channel>
+    <channel skip="0">33</channel>
+    <channel skip="0">34</channel>
+    <channel skip="0">35</channel>
+    <channel skip="0">36</channel>
+    <channel skip="0">37</channel>
+    <channel skip="0">38</channel>
+    <channel skip="0">39</channel>
+   </group>
+   <group>
+    <channel skip="0">40</channel>
+    <channel skip="0">41</channel>
+    <channel skip="0">42</channel>
+    <channel skip="0">43</channel>
+    <channel skip="0">44</channel>
+    <channel skip="0">45</channel>
+    <channel skip="0">46</channel>
+    <channel skip="0">47</channel>
+    <channel skip="0">48</channel>
+    <channel skip="0">49</channel>
+   </group>
+   <group>
+    <channel skip="0">50</channel>
+    <channel skip="0">51</channel>
+    <channel skip="0">52</channel>
+    <channel skip="0">53</channel>
+    <channel skip="0">54</channel>
+    <channel skip="0">55</channel>
+    <channel skip="0">56</channel>
+    <channel skip="0">57</channel>
+    <channel skip="0">58</channel>
+    <channel skip="0">59</channel>
+   </group>
+   <group>
+    <channel skip="0">60</channel>
+    <channel skip="0">61</channel>
+    <channel skip="0">62</channel>
+    <channel skip="0">63</channel>
+    <channel skip="0">64</channel>
+    <channel skip="0">65</channel>
+   </group>
+   <group>
+    <channel skip="0">66</channel>
+    <channel skip="0">67</channel>
+    <channel skip="0">68</channel>
+    <channel skip="0">69</channel>
+    <channel skip="0">70</channel>
+   </group>
+   <group>
+    <channel skip="0">71</channel>
+    <channel skip="0">72</channel>
+    <channel skip="0">73</channel>
+    <channel skip="0">74</channel>
+    <channel skip="0">75</channel>
+    <channel skip="0">76</channel>
+   </group>
+   <group>
+    <channel skip="0">77</channel>
+    <channel skip="0">78</channel>
+    <channel skip="0">79</channel>
+   </group>
+   <group>
+    <channel skip="0">80</channel>
+    <channel skip="0">81</channel>
+    <channel skip="0">82</channel>
+    <channel skip="0">83</channel>
+    <channel skip="0">84</channel>
+    <channel skip="0">85</channel>
+    <channel skip="0">86</channel>
+    <channel skip="0">87</channel>
+    <channel skip="0">88</channel>
+    <channel skip="0">89</channel>
+    <channel skip="0">90</channel>
+    <channel skip="0">91</channel>
+    <channel skip="0">92</channel>
+    <channel skip="0">93</channel>
+   </group>
+   <group>
+    <channel skip="0">94</channel>
+    <channel skip="0">95</channel>
+    <channel skip="0">96</channel>
+    <channel skip="0">97</channel>
+    <channel skip="0">98</channel>
+    <channel skip="0">99</channel>
+    <channel skip="0">100</channel>
+    <channel skip="0">101</channel>
+    <channel skip="0">102</channel>
+    <channel skip="1">103</channel>
+    <channel skip="0">104</channel>
+    <channel skip="0">105</channel>
+   </group>
+   <group>
+    <channel skip="0">106</channel>
+    <channel skip="0">107</channel>
+    <channel skip="0">108</channel>
+    <channel skip="0">109</channel>
+    <channel skip="0">110</channel>
+    <channel skip="0">111</channel>
+    <channel skip="0">112</channel>
+    <channel skip="0">113</channel>
+    <channel skip="0">114</channel>
+    <channel skip="0">115</channel>
+    <channel skip="0">116</channel>
+    <channel skip="0">117</channel>
+   </group>
+   <group>
+    <channel skip="0">118</channel>
+    <channel skip="0">119</channel>
+    <channel skip="0">120</channel>
+    <channel skip="0">121</channel>
+    <channel skip="0">122</channel>
+    <channel skip="0">123</channel>
+   </group>
+   <group>
+    <channel skip="0">124</channel>
+    <channel skip="0">125</channel>
+    <channel skip="0">126</channel>
+    <channel skip="0">127</channel>
+   </group>
+   <group>
+    <channel skip="0">128</channel>
+    <channel skip="0">129</channel>
+    <channel skip="0">130</channel>
+    <channel skip="0">131</channel>
+    <channel skip="0">132</channel>
+    <channel skip="0">133</channel>
+    <channel skip="0">134</channel>
+    <channel skip="0">135</channel>
+    <channel skip="0">136</channel>
+    <channel skip="0">137</channel>
+    <channel skip="0">138</channel>
+    <channel skip="0">139</channel>
+    <channel skip="0">140</channel>
+    <channel skip="0">141</channel>
+   </group>
+   <group>
+    <channel skip="0">142</channel>
+    <channel skip="0">143</channel>
+   </group>
+   <group>
+    <channel skip="0">144</channel>
+    <channel skip="0">145</channel>
+    <channel skip="0">146</channel>
+   </group>
+   <group>
+    <channel skip="0">147</channel>
+    <channel skip="0">148</channel>
+    <channel skip="0">149</channel>
+    <channel skip="0">150</channel>
+    <channel skip="0">151</channel>
+   </group>
+   <group>
+    <channel skip="0">152</channel>
+    <channel skip="0">153</channel>
+    <channel skip="0">154</channel>
+    <channel skip="0">155</channel>
+    <channel skip="0">156</channel>
+    <channel skip="0">157</channel>
+   </group>
+   <group>
+    <channel skip="0">158</channel>
+    <channel skip="0">159</channel>
+    <channel skip="0">160</channel>
+    <channel skip="0">161</channel>
+   </group>
+   <group>
+    <channel skip="0">162</channel>
+    <channel skip="0">163</channel>
+    <channel skip="0">164</channel>
+    <channel skip="0">165</channel>
+    <channel skip="0">166</channel>
+    <channel skip="0">167</channel>
+    <channel skip="0">168</channel>
+    <channel skip="0">169</channel>
+    <channel skip="0">170</channel>
+    <channel skip="0">171</channel>
+   </group>
+   <group>
+    <channel skip="0">172</channel>
+    <channel skip="0">173</channel>
+    <channel skip="0">174</channel>
+    <channel skip="0">175</channel>
+    <channel skip="0">176</channel>
+   </group>
+   <group>
+    <channel skip="0">177</channel>
+    <channel skip="0">178</channel>
+    <channel skip="0">179</channel>
+    <channel skip="0">180</channel>
+    <channel skip="0">181</channel>
+   </group>
+   <group>
+    <channel skip="0">182</channel>
+    <channel skip="0">183</channel>
+    <channel skip="0">184</channel>
+    <channel skip="0">185</channel>
+    <channel skip="0">186</channel>
+    <channel skip="0">187</channel>
+   </group>
+   <group>
+    <channel skip="0">188</channel>
+    <channel skip="0">189</channel>
+    <channel skip="0">190</channel>
+   </group>
+   <group>
+    <channel skip="0">191</channel>
+   </group>
+  </channelGroups>
+ </anatomicalDescription>
+ <region>
+ </region>
+ <brainRegions>
+ </brainRegions>
+ <spikeDetection/>
+ <neuroscope version="2.0.0">
+  <miscellaneous>
+   <screenGain>0.2</screenGain>
+   <traceBackgroundImage></traceBackgroundImage>
+  </miscellaneous>
+  <video>
+   <rotate>0</rotate>
+   <flip>0</flip>
+   <videoImage></videoImage>
+   <positionsBackground>0</positionsBackground>
+  </video>
+  <spikes>
+   <nSamples>32</nSamples>
+   <peakSampleIndex>16</peakSampleIndex>
+  </spikes>
+ </neuroscope>
+</parameters>

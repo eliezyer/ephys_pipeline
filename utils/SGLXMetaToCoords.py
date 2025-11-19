@@ -682,7 +682,7 @@ def MetaToCoords(metaFullPath, outType, badChan= np.zeros((0), dtype = 'int'), d
                 1: CoordsToKSChanMap,
                 2: CoordsToJRCString,
                 3: CoordsToGeomMap,
-                4: CoordsToNPY
+                4: CoordsToNPY,
                 5: CoordsToKSjson
         }
         
@@ -702,7 +702,7 @@ def MetaToCoords(metaFullPath, outType, badChan= np.zeros((0), dtype = 'int'), d
 #   4 = npy file with (nchan,2) matrix of xy coordinates, e.g. for YASS and related sorters
 # file is saved to the same path as the metadata file.
 #
-def main(*basepath=''):
-    basepath = Path(basepath)
-    outType = 5 # Coords to kilosort json file
-    MetaToCoords( metaFullPath=metaFullPath, outType=outType, showPlot=False)
+# def main(*basepath=''):
+#     basepath = Path(basepath)
+#     outType = 5 # Coords to kilosort json file
+    # MetaToCoords( metaFullPath=metaFullPath, outType=outType, showPlot=False)

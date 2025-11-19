@@ -1,0 +1,534 @@
+[Thd 15616 CPU 2 8/07/25 15:10:25.002] Error: Missing -dir.
+[Thd 15616 CPU 2 8/07/25 15:10:25.002] 
+[Thd 15616 CPU 2 8/07/25 15:10:25.002] *** ERROR: MISSING CRITICAL PARAMETERS ***
+[Thd 15616 CPU 2 8/07/25 15:10:25.002] ------------------------
+[Thd 15616 CPU 4 8/07/25 15:10:25.002] Purpose:
+[Thd 15616 CPU 4 8/07/25 15:10:25.002] + Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
+[Thd 15616 CPU 4 8/07/25 15:10:25.002] + ...Or run on any individual file.
+[Thd 15616 CPU 4 8/07/25 15:10:25.018] + Optionally apply demultiplexing corrections.
+[Thd 15616 CPU 4 8/07/25 15:10:25.018] + Optionally apply band-pass and global CAR filters.
+[Thd 15616 CPU 4 8/07/25 15:10:25.018] + Optionally edit out saturation artifacts.
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] + Optionally extract tables of sync waveform edge times to drive TPrime.
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] + Optionally extract tables of other nonneural event times to be aligned with spikes.
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] + Optionally join the above outputs across different runs (supercat feature).
+
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] Output:
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] + Results are placed next to source, named like this, with t-index = tcat:
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] +    path/run_name_g5_tcat.imec1.ap.bin.
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] + Errors and run messages are appended to CatGT.log in the current working directory.
+
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] Usage:
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] >CatGT -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb <which streams> [ options ]
+
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] Which streams:
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -ni                      ;required to process ni stream
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -ob                      ;required to process ob streams
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -ap                      ;required to process ap streams
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -lf                      ;required to process lf streams
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -obx=0,3:5               ;if -ob process these OneBoxes
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -prb_3A                  ;if -ap or -lf process 3A-style probe files, e.g., run_name_g0_t0.imec.ap.bin
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -prb=0,3:5               ;if -ap or -lf AND !prb_3A process these probes
+
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] Options:
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -no_run_fld              ;older data, or data files relocated without a run folder
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -prb_fld                 ;use folder-per-probe organization
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -prb_miss_ok             ;instead of stopping, silently skip missing probes
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -gtlist={gj,tja,tjb}     ;override {-g,-t} giving each listed g-index its own t-range
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -t=cat                   ;extract events from CatGT output files (instead of -t=ta,tb)
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -exported                ;apply FileViewer 'exported' tag to in/output filenames
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -t_miss_ok               ;instead of stopping, zero-fill if trial missing
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -zerofillmax=500         ;set a maximum zero-fill span (millisec)
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -no_linefill             ;disable overwriting zero fills with line fills
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -startsecs=120.0         ;skip this initial span of each input stream (float seconds)
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -maxsecs=7.5             ;set a maximum output file length (float seconds)
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -loccar_um=40,140        ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -gblcar                  ;apply ap global CAR filter over all channels
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -gbldmx                  ;apply ap global demuxed CAR filter over channel groups
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -xa=0,0,2,3.0,4.5,25     ;extract pulse signal from analog chan (js,ip,word,thresh1(V),thresh2(V),millisec)
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -xd=2,0,384,6,500        ;extract pulse signal from digital chan (js,ip,word,bit,millisec)
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -xia=0,0,2,3.0,4.5,2     ;inverted version of xa
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -xid=2,0,384,6,50        ;inverted version of xd
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -bf=0,0,8,2,4,3          ;extract numeric bit-field from digital chan (js,ip,word,startbit,nbits,inarow)
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -inarow=5                ;extractor {xa,xd,xia,xid} antibounce stay high/low sample count
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -no_auto_sync            ;disable the automatic extraction of sync edges in all streams
+[Thd 15616 CPU 2 8/07/25 15:10:25.018] -save=2,0,5,20:60        ;save subset of probe chans (js,ip1,ip2,chan-list)
+[Thd 15616 CPU 2 8/07/25 15:10:25.034] -sepShanks=0,0,1,2,-1    ;save each shank in sep file (ip,ip0,ip1,ip2,ip3)
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] -maxZ=0,0,100            ;probe inserted to given depth (ip,depth-type,depth-value)
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] -pass1_force_ni_ob_bin   ;write pass one ni/ob binary tcat file even if not changed
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] -supercat={dir,run_ga}   ;concatenate existing output files across runs (see ReadMe)
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] -supercat_trim_edges     ;supercat after trimming each stream to matched sync edges
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] -supercat_skip_ni_ob_bin ;do not supercat ni/ob binary files
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] -dest=path               ;alternate path for output files (must exist)
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] -no_catgt_fld            ;if using -dest, do not create catgt_run subfolder
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] -out_prb_fld             ;if using -dest, create output subfolder per probe
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] ------------------------
+[Thd 15616 CPU 6 8/07/25 15:10:25.034] 
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] Error: Missing -dir.
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] 
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] *** ERROR: MISSING CRITICAL PARAMETERS ***
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] ------------------------
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] Purpose:
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + ...Or run on any individual file.
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + Optionally apply demultiplexing corrections.
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + Optionally apply band-pass and global CAR filters.
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + Optionally edit out saturation artifacts.
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + Optionally extract tables of sync waveform edge times to drive TPrime.
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + Optionally extract tables of other nonneural event times to be aligned with spikes.
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + Optionally join the above outputs across different runs (supercat feature).
+
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] Output:
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + Results are placed next to source, named like this, with t-index = tcat:
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] +    path/run_name_g5_tcat.imec1.ap.bin.
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] + Errors and run messages are appended to CatGT.log in the current working directory.
+
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] Usage:
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] >CatGT -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb <which streams> [ options ]
+
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] Which streams:
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -ni                      ;required to process ni stream
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -ob                      ;required to process ob streams
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -ap                      ;required to process ap streams
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -lf                      ;required to process lf streams
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -obx=0,3:5               ;if -ob process these OneBoxes
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -prb_3A                  ;if -ap or -lf process 3A-style probe files, e.g., run_name_g0_t0.imec.ap.bin
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -prb=0,3:5               ;if -ap or -lf AND !prb_3A process these probes
+
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] Options:
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -no_run_fld              ;older data, or data files relocated without a run folder
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -prb_fld                 ;use folder-per-probe organization
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -prb_miss_ok             ;instead of stopping, silently skip missing probes
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -gtlist={gj,tja,tjb}     ;override {-g,-t} giving each listed g-index its own t-range
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -t=cat                   ;extract events from CatGT output files (instead of -t=ta,tb)
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -exported                ;apply FileViewer 'exported' tag to in/output filenames
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -t_miss_ok               ;instead of stopping, zero-fill if trial missing
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -zerofillmax=500         ;set a maximum zero-fill span (millisec)
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -no_linefill             ;disable overwriting zero fills with line fills
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -startsecs=120.0         ;skip this initial span of each input stream (float seconds)
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -maxsecs=7.5             ;set a maximum output file length (float seconds)
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+[Thd 8328 CPU 12 8/07/25 15:10:38.887] -no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -loccar_um=40,140        ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -gblcar                  ;apply ap global CAR filter over all channels
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -gbldmx                  ;apply ap global demuxed CAR filter over channel groups
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -xa=0,0,2,3.0,4.5,25     ;extract pulse signal from analog chan (js,ip,word,thresh1(V),thresh2(V),millisec)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -xd=2,0,384,6,500        ;extract pulse signal from digital chan (js,ip,word,bit,millisec)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -xia=0,0,2,3.0,4.5,2     ;inverted version of xa
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -xid=2,0,384,6,50        ;inverted version of xd
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -bf=0,0,8,2,4,3          ;extract numeric bit-field from digital chan (js,ip,word,startbit,nbits,inarow)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -inarow=5                ;extractor {xa,xd,xia,xid} antibounce stay high/low sample count
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -no_auto_sync            ;disable the automatic extraction of sync edges in all streams
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -save=2,0,5,20:60        ;save subset of probe chans (js,ip1,ip2,chan-list)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -sepShanks=0,0,1,2,-1    ;save each shank in sep file (ip,ip0,ip1,ip2,ip3)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -maxZ=0,0,100            ;probe inserted to given depth (ip,depth-type,depth-value)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -pass1_force_ni_ob_bin   ;write pass one ni/ob binary tcat file even if not changed
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -supercat={dir,run_ga}   ;concatenate existing output files across runs (see ReadMe)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -supercat_trim_edges     ;supercat after trimming each stream to matched sync edges
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -supercat_skip_ni_ob_bin ;do not supercat ni/ob binary files
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -dest=path               ;alternate path for output files (must exist)
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -no_catgt_fld            ;if using -dest, do not create catgt_run subfolder
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] -out_prb_fld             ;if using -dest, create output subfolder per probe
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] ------------------------
+[Thd 8328 CPU 12 8/07/25 15:10:38.904] 
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] Error: Missing -dir.
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] 
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] *** ERROR: MISSING CRITICAL PARAMETERS ***
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] ------------------------
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] Purpose:
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + ...Or run on any individual file.
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + Optionally apply demultiplexing corrections.
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + Optionally apply band-pass and global CAR filters.
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + Optionally edit out saturation artifacts.
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + Optionally extract tables of sync waveform edge times to drive TPrime.
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + Optionally extract tables of other nonneural event times to be aligned with spikes.
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + Optionally join the above outputs across different runs (supercat feature).
+
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] Output:
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + Results are placed next to source, named like this, with t-index = tcat:
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] +    path/run_name_g5_tcat.imec1.ap.bin.
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] + Errors and run messages are appended to CatGT.log in the current working directory.
+
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] Usage:
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] >CatGT -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb <which streams> [ options ]
+
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] Which streams:
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] -ni                      ;required to process ni stream
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] -ob                      ;required to process ob streams
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] -ap                      ;required to process ap streams
+[Thd 27200 CPU 2 8/07/25 15:10:40.881] -lf                      ;required to process lf streams
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -obx=0,3:5               ;if -ob process these OneBoxes
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -prb_3A                  ;if -ap or -lf process 3A-style probe files, e.g., run_name_g0_t0.imec.ap.bin
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -prb=0,3:5               ;if -ap or -lf AND !prb_3A process these probes
+
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] Options:
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -no_run_fld              ;older data, or data files relocated without a run folder
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -prb_fld                 ;use folder-per-probe organization
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -prb_miss_ok             ;instead of stopping, silently skip missing probes
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -gtlist={gj,tja,tjb}     ;override {-g,-t} giving each listed g-index its own t-range
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -t=cat                   ;extract events from CatGT output files (instead of -t=ta,tb)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -exported                ;apply FileViewer 'exported' tag to in/output filenames
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -t_miss_ok               ;instead of stopping, zero-fill if trial missing
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -zerofillmax=500         ;set a maximum zero-fill span (millisec)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -no_linefill             ;disable overwriting zero fills with line fills
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -startsecs=120.0         ;skip this initial span of each input stream (float seconds)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -maxsecs=7.5             ;set a maximum output file length (float seconds)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -loccar_um=40,140        ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -gblcar                  ;apply ap global CAR filter over all channels
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -gbldmx                  ;apply ap global demuxed CAR filter over channel groups
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -xa=0,0,2,3.0,4.5,25     ;extract pulse signal from analog chan (js,ip,word,thresh1(V),thresh2(V),millisec)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -xd=2,0,384,6,500        ;extract pulse signal from digital chan (js,ip,word,bit,millisec)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -xia=0,0,2,3.0,4.5,2     ;inverted version of xa
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -xid=2,0,384,6,50        ;inverted version of xd
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -bf=0,0,8,2,4,3          ;extract numeric bit-field from digital chan (js,ip,word,startbit,nbits,inarow)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -inarow=5                ;extractor {xa,xd,xia,xid} antibounce stay high/low sample count
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -no_auto_sync            ;disable the automatic extraction of sync edges in all streams
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -save=2,0,5,20:60        ;save subset of probe chans (js,ip1,ip2,chan-list)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -sepShanks=0,0,1,2,-1    ;save each shank in sep file (ip,ip0,ip1,ip2,ip3)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -maxZ=0,0,100            ;probe inserted to given depth (ip,depth-type,depth-value)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -pass1_force_ni_ob_bin   ;write pass one ni/ob binary tcat file even if not changed
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -supercat={dir,run_ga}   ;concatenate existing output files across runs (see ReadMe)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -supercat_trim_edges     ;supercat after trimming each stream to matched sync edges
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -supercat_skip_ni_ob_bin ;do not supercat ni/ob binary files
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -dest=path               ;alternate path for output files (must exist)
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -no_catgt_fld            ;if using -dest, do not create catgt_run subfolder
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] -out_prb_fld             ;if using -dest, create output subfolder per probe
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] ------------------------
+[Thd 27200 CPU 2 8/07/25 15:10:40.897] 
+[Thd 24652 CPU 2 10/30/25 17:34:03.789] Unknown option or wrong param count for option 'Regalado/Desktop/10_29_2025_thalamus_4shank_g0'.
+[Thd 24652 CPU 2 10/30/25 17:34:03.789] 
+[Thd 13084 CPU 2 10/30/25 17:34:46.681] Unknown option or wrong param count for option 'Regalado\Desktop\10_29_2025_thalamus_4shank_g0'.
+[Thd 13084 CPU 2 10/30/25 17:34:46.683] 
+[Thd 16888 CPU 2 10/30/25 18:13:23.512] Cmdline: CatGT -dir=C:/Users/Public/tim_try -run=thalamus_4shank -g=0 -t=0 -prb_fld -t_miss_ok -ap -prb=0 -apfilter=butter,12,300,9000 -gblcar -gfix=0.4,0.1,0.02 -dest=C:/Users/Public/tim_try
+[Thd 16888 CPU 2 10/30/25 18:25:36.011] Run thalamus_4shank_g0 Gfix prb 0 edits/sec 0
+[Thd 16888 CPU 2 10/30/25 18:25:36.011] 
+[Thd 16236 CPU 2 10/30/25 19:45:55.705] Cmdline: CatGT -dir=C:/Users/Public/tim_try -run=ACC_4shank -g=0 -t=0 -prb_fld -t_miss_ok -ap -prb=0 -apfilter=butter,12,300,9000 -gblcar -gfix=0.4,0.1,0.02 -dest=C:/Users/Public/tim_try
+[Thd 16236 CPU 2 10/30/25 19:45:55.705] Meta file not found 'C:/Users/Public/tim_try/ACC_4shank_g0/ACC_4shank_g0_imec0/ACC_4shank_g0_t0.imec0.ap.meta'.
+[Thd 16236 CPU 2 10/30/25 19:45:55.705] Meta file not found 'C:/Users/Public/tim_try/ACC_4shank_g0/ACC_4shank_g0_imec0/ACC_4shank_g0_t0.imec0.ap.meta'.
+[Thd 16236 CPU 2 10/30/25 19:45:55.705] 
+[Thd 19192 CPU 2 10/30/25 19:47:27.649] Cmdline: CatGT -dir=C:/Users/Public/tim_try -run=10_29_2025_ACC_4shank -g=0 -t=0 -prb_fld -t_miss_ok -ap -prb=0 -apfilter=butter,12,300,9000 -gblcar -gfix=0.4,0.1,0.02 -dest=C:/Users/Public/tim_try
+[Thd 19192 CPU 2 10/30/25 19:59:01.863] Run 10_29_2025_ACC_4shank_g0 Gfix prb 0 edits/sec 0.00124
+[Thd 19192 CPU 14 10/30/25 19:59:01.878] 
+[Thd 24760 CPU 2 10/30/25 21:35:10.945] Cmdline: CatGT -dir=Z:/Tim/Data/Neuropixels/NPX1 -run=10_28_2025_shank0_zig_zag -g=0 -t=0 -prb_fld -t_miss_ok -ap -prb=0 -apfilter=butter,12,300,9000 -gblcar -gfix=0.4,0.1,0.02 -dest=Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0
+[Thd 24760 CPU 2 10/30/25 21:35:11.173] Meta file not found 'Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0/10_28_2025_shank0_zig_zag_g0_imec0/10_28_2025_shank0_zig_zag_g0_t0.imec0.ap.meta'.
+[Thd 24760 CPU 2 10/30/25 21:35:11.174] Meta file not found 'Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0/10_28_2025_shank0_zig_zag_g0_imec0/10_28_2025_shank0_zig_zag_g0_t0.imec0.ap.meta'.
+[Thd 24760 CPU 2 10/30/25 21:35:11.189] 
+[Thd 7312 CPU 4 10/30/25 21:39:05.980] Cmdline: CatGT -dir=Z:/Tim/Data/Neuropixels/NPX1 -run=10_28_2025_shank0_zig_zag -g=0 -t=0 -prb_fld -t_miss_ok -ap -prb=0 -apfilter=butter,12,300,9000 -gblcar -gfix=0.4,0.1,0.02 -dest=Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0
+[Thd 7312 CPU 2 10/30/25 21:39:05.984] Meta file not found 'Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0/10_28_2025_shank0_zig_zag_g0_imec0/10_28_2025_shank0_zig_zag_g0_t0.imec0.ap.meta'.
+[Thd 7312 CPU 2 10/30/25 21:39:05.984] Meta file not found 'Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0/10_28_2025_shank0_zig_zag_g0_imec0/10_28_2025_shank0_zig_zag_g0_t0.imec0.ap.meta'.
+[Thd 7312 CPU 2 10/30/25 21:39:06.018] 
+[Thd 8448 CPU 2 10/30/25 21:40:01.363] Cmdline: CatGT -dir=Z:/Tim/Data/Neuropixels/NPX1 -run=10_28_2025_shank0_zig_zag -g=0 -t=0 -prb_fld -t_miss_ok -ap -prb=0 -apfilter=butter,12,300,9000 -gblcar -gfix=0.4,0.1,0.02 -dest=Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0
+[Thd 8448 CPU 2 10/30/25 21:40:01.366] Meta file not found 'Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0/10_28_2025_shank0_zig_zag_g0_imec0/10_28_2025_shank0_zig_zag_g0_t0.imec0.ap.meta'.
+[Thd 8448 CPU 2 10/30/25 21:40:01.367] Meta file not found 'Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0/10_28_2025_shank0_zig_zag_g0_imec0/10_28_2025_shank0_zig_zag_g0_t0.imec0.ap.meta'.
+[Thd 8448 CPU 2 10/30/25 21:40:01.378] 
+[Thd 23288 CPU 2 10/30/25 21:41:15.971] Cmdline: CatGT -dir=Z:/Tim/Data/Neuropixels/NPX1 -run=10_28_2025_shank0_zig_zag -g=0 -t=0 -prb_fld -t_miss_ok -ap -prb=0 -apfilter=butter,12,300,9000 -gblcar -gfix=0.4,0.1,0.02 -dest=Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0
+[Thd 23288 CPU 2 10/30/25 21:41:15.973] Meta file not found 'Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0/10_28_2025_shank0_zig_zag_g0_imec0/10_28_2025_shank0_zig_zag_g0_t0.imec0.ap.meta'.
+[Thd 23288 CPU 2 10/30/25 21:41:15.973] Meta file not found 'Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0/10_28_2025_shank0_zig_zag_g0_imec0/10_28_2025_shank0_zig_zag_g0_t0.imec0.ap.meta'.
+[Thd 23288 CPU 2 10/30/25 21:41:16.015] 
+[Thd 24016 CPU 2 10/30/25 21:43:17.069] Cmdline: CatGT -dir=Z:/Tim/Data/Neuropixels/NPX1 -run=10_28_2025_shank0_zig_zag -g=0 -t=0 -prb_fld -t_miss_ok -ap -prb=0 -apfilter=butter,12,300,9000 -gblcar -gfix=0.4,0.1,0.02 -dest=Z:/Tim/Data/Neuropixels/NPX1/10_28_2025_shank0_zig_zag_g0
+[Thd 24016 CPU 8 10/30/25 22:11:33.108] Run 10_28_2025_shank0_zig_zag_g0 Gfix prb 0 edits/sec 0.00135
+[Thd 24016 CPU 2 10/30/25 22:11:42.053] 
+[Thd 43772 CPU 2 11/07/25 13:59:27.239] Error: Missing -dir.
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] 
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] *** ERROR: MISSING CRITICAL PARAMETERS ***
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] ------------------------
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] Purpose:
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + ...Or run on any individual file.
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + Optionally apply demultiplexing corrections.
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + Optionally apply band-pass and global CAR filters.
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + Optionally edit out saturation artifacts.
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + Optionally extract tables of sync waveform edge times to drive TPrime.
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + Optionally extract tables of other nonneural event times to be aligned with spikes.
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + Optionally join the above outputs across different runs (supercat feature).
+
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] Output:
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + Results are placed next to source, named like this, with t-index = tcat:
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] +    path/run_name_g5_tcat.imec1.ap.bin.
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] + Errors and run messages are appended to CatGT.log in the current working directory.
+
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] Usage:
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] >CatGT -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb <which streams> [ options ]
+
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] Which streams:
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -ni                      ;required to process ni stream
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -ob                      ;required to process ob streams
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -ap                      ;required to process ap streams
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -lf                      ;required to process lf streams
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -obx=0,3:5               ;if -ob process these OneBoxes
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -prb_3A                  ;if -ap or -lf process 3A-style probe files, e.g., run_name_g0_t0.imec.ap.bin
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -prb=0,3:5               ;if -ap or -lf AND !prb_3A process these probes
+
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] Options:
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -no_run_fld              ;older data, or data files relocated without a run folder
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -prb_fld                 ;use folder-per-probe organization
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -prb_miss_ok             ;instead of stopping, silently skip missing probes
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -gtlist={gj,tja,tjb}     ;override {-g,-t} giving each listed g-index its own t-range
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -t=cat                   ;extract events from CatGT output files (instead of -t=ta,tb)
+[Thd 43772 CPU 2 11/07/25 13:59:27.255] -exported                ;apply FileViewer 'exported' tag to in/output filenames
+[Thd 43772 CPU 2 11/07/25 13:59:27.271] -t_miss_ok               ;instead of stopping, zero-fill if trial missing
+[Thd 43772 CPU 2 11/07/25 13:59:27.271] -zerofillmax=500         ;set a maximum zero-fill span (millisec)
+[Thd 43772 CPU 2 11/07/25 13:59:27.271] -no_linefill             ;disable overwriting zero fills with line fills
+[Thd 43772 CPU 2 11/07/25 13:59:27.271] -startsecs=120.0         ;skip this initial span of each input stream (float seconds)
+[Thd 43772 CPU 2 11/07/25 13:59:27.271] -maxsecs=7.5             ;set a maximum output file length (float seconds)
+[Thd 43772 CPU 2 11/07/25 13:59:27.271] -apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
+[Thd 43772 CPU 2 11/07/25 13:59:27.271] -lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+[Thd 43772 CPU 10 11/07/25 13:59:27.271] -no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
+[Thd 43772 CPU 10 11/07/25 13:59:27.271] -loccar_um=40,140        ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 43772 CPU 10 11/07/25 13:59:27.271] -loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -gblcar                  ;apply ap global CAR filter over all channels
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -gbldmx                  ;apply ap global demuxed CAR filter over channel groups
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -xa=0,0,2,3.0,4.5,25     ;extract pulse signal from analog chan (js,ip,word,thresh1(V),thresh2(V),millisec)
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -xd=2,0,384,6,500        ;extract pulse signal from digital chan (js,ip,word,bit,millisec)
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -xia=0,0,2,3.0,4.5,2     ;inverted version of xa
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -xid=2,0,384,6,50        ;inverted version of xd
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -bf=0,0,8,2,4,3          ;extract numeric bit-field from digital chan (js,ip,word,startbit,nbits,inarow)
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -inarow=5                ;extractor {xa,xd,xia,xid} antibounce stay high/low sample count
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -no_auto_sync            ;disable the automatic extraction of sync edges in all streams
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -save=2,0,5,20:60        ;save subset of probe chans (js,ip1,ip2,chan-list)
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -sepShanks=0,0,1,2,-1    ;save each shank in sep file (ip,ip0,ip1,ip2,ip3)
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -maxZ=0,0,100            ;probe inserted to given depth (ip,depth-type,depth-value)
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -pass1_force_ni_ob_bin   ;write pass one ni/ob binary tcat file even if not changed
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -supercat={dir,run_ga}   ;concatenate existing output files across runs (see ReadMe)
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -supercat_trim_edges     ;supercat after trimming each stream to matched sync edges
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -supercat_skip_ni_ob_bin ;do not supercat ni/ob binary files
+[Thd 43772 CPU 10 11/07/25 13:59:27.274] -dest=path               ;alternate path for output files (must exist)
+[Thd 43772 CPU 6 11/07/25 13:59:27.274] -no_catgt_fld            ;if using -dest, do not create catgt_run subfolder
+[Thd 43772 CPU 6 11/07/25 13:59:27.274] -out_prb_fld             ;if using -dest, create output subfolder per probe
+[Thd 43772 CPU 6 11/07/25 13:59:27.274] ------------------------
+[Thd 43772 CPU 6 11/07/25 13:59:27.274] 
+[Thd 31648 CPU 2 11/07/25 13:59:35.817] Error: Missing -dir.
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] 
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] *** ERROR: MISSING CRITICAL PARAMETERS ***
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] ------------------------
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] Purpose:
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + ...Or run on any individual file.
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + Optionally apply demultiplexing corrections.
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + Optionally apply band-pass and global CAR filters.
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + Optionally edit out saturation artifacts.
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + Optionally extract tables of sync waveform edge times to drive TPrime.
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + Optionally extract tables of other nonneural event times to be aligned with spikes.
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + Optionally join the above outputs across different runs (supercat feature).
+
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] Output:
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + Results are placed next to source, named like this, with t-index = tcat:
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] +    path/run_name_g5_tcat.imec1.ap.bin.
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] + Errors and run messages are appended to CatGT.log in the current working directory.
+
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] Usage:
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] >CatGT -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb <which streams> [ options ]
+
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] Which streams:
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -ni                      ;required to process ni stream
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -ob                      ;required to process ob streams
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -ap                      ;required to process ap streams
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -lf                      ;required to process lf streams
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -obx=0,3:5               ;if -ob process these OneBoxes
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -prb_3A                  ;if -ap or -lf process 3A-style probe files, e.g., run_name_g0_t0.imec.ap.bin
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -prb=0,3:5               ;if -ap or -lf AND !prb_3A process these probes
+
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] Options:
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -no_run_fld              ;older data, or data files relocated without a run folder
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -prb_fld                 ;use folder-per-probe organization
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -prb_miss_ok             ;instead of stopping, silently skip missing probes
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -gtlist={gj,tja,tjb}     ;override {-g,-t} giving each listed g-index its own t-range
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -t=cat                   ;extract events from CatGT output files (instead of -t=ta,tb)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -exported                ;apply FileViewer 'exported' tag to in/output filenames
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -t_miss_ok               ;instead of stopping, zero-fill if trial missing
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -zerofillmax=500         ;set a maximum zero-fill span (millisec)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -no_linefill             ;disable overwriting zero fills with line fills
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -startsecs=120.0         ;skip this initial span of each input stream (float seconds)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -maxsecs=7.5             ;set a maximum output file length (float seconds)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -loccar_um=40,140        ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -gblcar                  ;apply ap global CAR filter over all channels
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -gbldmx                  ;apply ap global demuxed CAR filter over channel groups
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -xa=0,0,2,3.0,4.5,25     ;extract pulse signal from analog chan (js,ip,word,thresh1(V),thresh2(V),millisec)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -xd=2,0,384,6,500        ;extract pulse signal from digital chan (js,ip,word,bit,millisec)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -xia=0,0,2,3.0,4.5,2     ;inverted version of xa
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -xid=2,0,384,6,50        ;inverted version of xd
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -bf=0,0,8,2,4,3          ;extract numeric bit-field from digital chan (js,ip,word,startbit,nbits,inarow)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -inarow=5                ;extractor {xa,xd,xia,xid} antibounce stay high/low sample count
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -no_auto_sync            ;disable the automatic extraction of sync edges in all streams
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -save=2,0,5,20:60        ;save subset of probe chans (js,ip1,ip2,chan-list)
+[Thd 31648 CPU 2 11/07/25 13:59:35.820] -sepShanks=0,0,1,2,-1    ;save each shank in sep file (ip,ip0,ip1,ip2,ip3)
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] -maxZ=0,0,100            ;probe inserted to given depth (ip,depth-type,depth-value)
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] -pass1_force_ni_ob_bin   ;write pass one ni/ob binary tcat file even if not changed
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] -supercat={dir,run_ga}   ;concatenate existing output files across runs (see ReadMe)
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] -supercat_trim_edges     ;supercat after trimming each stream to matched sync edges
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] -supercat_skip_ni_ob_bin ;do not supercat ni/ob binary files
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] -dest=path               ;alternate path for output files (must exist)
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] -no_catgt_fld            ;if using -dest, do not create catgt_run subfolder
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] -out_prb_fld             ;if using -dest, create output subfolder per probe
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] ------------------------
+[Thd 31648 CPU 2 11/07/25 13:59:35.836] 
+[Thd 24736 CPU 2 11/07/25 13:59:38.804] Unknown option or wrong param count for option '--help'.
+[Thd 24736 CPU 2 11/07/25 13:59:38.804] 
+[Thd 17932 CPU 2 11/07/25 13:59:41.266] Unknown option or wrong param count for option '-h'.
+[Thd 17932 CPU 2 11/07/25 13:59:41.278] 
+[Thd 13216 CPU 2 11/07/25 13:59:44.538] Error: Missing -dir.
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] 
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] *** ERROR: MISSING CRITICAL PARAMETERS ***
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] ------------------------
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] Purpose:
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + ...Or run on any individual file.
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + Optionally apply demultiplexing corrections.
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + Optionally apply band-pass and global CAR filters.
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + Optionally edit out saturation artifacts.
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + Optionally extract tables of sync waveform edge times to drive TPrime.
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + Optionally extract tables of other nonneural event times to be aligned with spikes.
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + Optionally join the above outputs across different runs (supercat feature).
+
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] Output:
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + Results are placed next to source, named like this, with t-index = tcat:
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] +    path/run_name_g5_tcat.imec1.ap.bin.
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] + Errors and run messages are appended to CatGT.log in the current working directory.
+
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] Usage:
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] >CatGT -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb <which streams> [ options ]
+
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] Which streams:
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -ni                      ;required to process ni stream
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -ob                      ;required to process ob streams
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -ap                      ;required to process ap streams
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -lf                      ;required to process lf streams
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -obx=0,3:5               ;if -ob process these OneBoxes
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -prb_3A                  ;if -ap or -lf process 3A-style probe files, e.g., run_name_g0_t0.imec.ap.bin
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -prb=0,3:5               ;if -ap or -lf AND !prb_3A process these probes
+
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] Options:
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -no_run_fld              ;older data, or data files relocated without a run folder
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -prb_fld                 ;use folder-per-probe organization
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -prb_miss_ok             ;instead of stopping, silently skip missing probes
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -gtlist={gj,tja,tjb}     ;override {-g,-t} giving each listed g-index its own t-range
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -t=cat                   ;extract events from CatGT output files (instead of -t=ta,tb)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -exported                ;apply FileViewer 'exported' tag to in/output filenames
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -t_miss_ok               ;instead of stopping, zero-fill if trial missing
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -zerofillmax=500         ;set a maximum zero-fill span (millisec)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -no_linefill             ;disable overwriting zero fills with line fills
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -startsecs=120.0         ;skip this initial span of each input stream (float seconds)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -maxsecs=7.5             ;set a maximum output file length (float seconds)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -loccar_um=40,140        ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -gblcar                  ;apply ap global CAR filter over all channels
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -gbldmx                  ;apply ap global demuxed CAR filter over channel groups
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -xa=0,0,2,3.0,4.5,25     ;extract pulse signal from analog chan (js,ip,word,thresh1(V),thresh2(V),millisec)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -xd=2,0,384,6,500        ;extract pulse signal from digital chan (js,ip,word,bit,millisec)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -xia=0,0,2,3.0,4.5,2     ;inverted version of xa
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -xid=2,0,384,6,50        ;inverted version of xd
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -bf=0,0,8,2,4,3          ;extract numeric bit-field from digital chan (js,ip,word,startbit,nbits,inarow)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -inarow=5                ;extractor {xa,xd,xia,xid} antibounce stay high/low sample count
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -no_auto_sync            ;disable the automatic extraction of sync edges in all streams
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -save=2,0,5,20:60        ;save subset of probe chans (js,ip1,ip2,chan-list)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -sepShanks=0,0,1,2,-1    ;save each shank in sep file (ip,ip0,ip1,ip2,ip3)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -maxZ=0,0,100            ;probe inserted to given depth (ip,depth-type,depth-value)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -pass1_force_ni_ob_bin   ;write pass one ni/ob binary tcat file even if not changed
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -supercat={dir,run_ga}   ;concatenate existing output files across runs (see ReadMe)
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -supercat_trim_edges     ;supercat after trimming each stream to matched sync edges
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -supercat_skip_ni_ob_bin ;do not supercat ni/ob binary files
+[Thd 13216 CPU 2 11/07/25 13:59:44.549] -dest=path               ;alternate path for output files (must exist)
+[Thd 13216 CPU 8 11/07/25 13:59:44.549] -no_catgt_fld            ;if using -dest, do not create catgt_run subfolder
+[Thd 13216 CPU 8 11/07/25 13:59:44.549] -out_prb_fld             ;if using -dest, create output subfolder per probe
+[Thd 13216 CPU 8 11/07/25 13:59:44.565] ------------------------
+[Thd 13216 CPU 8 11/07/25 13:59:44.565] 
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] Error: Missing -dir.
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] 
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] *** ERROR: MISSING CRITICAL PARAMETERS ***
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] ------------------------
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] Purpose:
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + ...Or run on any individual file.
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + Optionally apply demultiplexing corrections.
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + Optionally apply band-pass and global CAR filters.
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + Optionally edit out saturation artifacts.
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + Optionally extract tables of sync waveform edge times to drive TPrime.
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + Optionally extract tables of other nonneural event times to be aligned with spikes.
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + Optionally join the above outputs across different runs (supercat feature).
+
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] Output:
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + Results are placed next to source, named like this, with t-index = tcat:
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] +    path/run_name_g5_tcat.imec1.ap.bin.
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] + Errors and run messages are appended to CatGT.log in the current working directory.
+
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] Usage:
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] >CatGT -dir=data_dir -run=run_name -g=ga,gb -t=ta,tb <which streams> [ options ]
+
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] Which streams:
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -ni                      ;required to process ni stream
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -ob                      ;required to process ob streams
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -ap                      ;required to process ap streams
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -lf                      ;required to process lf streams
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -obx=0,3:5               ;if -ob process these OneBoxes
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -prb_3A                  ;if -ap or -lf process 3A-style probe files, e.g., run_name_g0_t0.imec.ap.bin
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -prb=0,3:5               ;if -ap or -lf AND !prb_3A process these probes
+
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] Options:
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -no_run_fld              ;older data, or data files relocated without a run folder
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -prb_fld                 ;use folder-per-probe organization
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -prb_miss_ok             ;instead of stopping, silently skip missing probes
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -gtlist={gj,tja,tjb}     ;override {-g,-t} giving each listed g-index its own t-range
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -t=cat                   ;extract events from CatGT output files (instead of -t=ta,tb)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -exported                ;apply FileViewer 'exported' tag to in/output filenames
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -t_miss_ok               ;instead of stopping, zero-fill if trial missing
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -zerofillmax=500         ;set a maximum zero-fill span (millisec)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -no_linefill             ;disable overwriting zero fills with line fills
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -startsecs=120.0         ;skip this initial span of each input stream (float seconds)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -maxsecs=7.5             ;set a maximum output file length (float seconds)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -apfilter=Typ,N,Fhi,Flo  ;apply ap band-pass filter of given {type, order, corners(float Hz)}
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -lffilter=Typ,N,Fhi,Flo  ;apply lf band-pass filter of given {type, order, corners(float Hz)}
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -no_tshift               ;DO NOT time-align channels to account for ADC multiplexing
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -loccar_um=40,140        ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -loccar=2,8              ;apply ap local CAR annulus (exclude radius, include radius)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -gblcar                  ;apply ap global CAR filter over all channels
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -gbldmx                  ;apply ap global demuxed CAR filter over channel groups
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -gfix=0.40,0.10,0.02     ;rmv ap artifacts: ||amp(mV)||, ||slope(mV/sample)||, ||noise(mV)||
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -chnexcl={prb;chans}     ;this probe, exclude listed chans from ap loccar, gblcar, gfix
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -xa=0,0,2,3.0,4.5,25     ;extract pulse signal from analog chan (js,ip,word,thresh1(V),thresh2(V),millisec)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -xd=2,0,384,6,500        ;extract pulse signal from digital chan (js,ip,word,bit,millisec)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -xia=0,0,2,3.0,4.5,2     ;inverted version of xa
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -xid=2,0,384,6,50        ;inverted version of xd
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -bf=0,0,8,2,4,3          ;extract numeric bit-field from digital chan (js,ip,word,startbit,nbits,inarow)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -inarow=5                ;extractor {xa,xd,xia,xid} antibounce stay high/low sample count
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -no_auto_sync            ;disable the automatic extraction of sync edges in all streams
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -save=2,0,5,20:60        ;save subset of probe chans (js,ip1,ip2,chan-list)
+[Thd 29996 CPU 2 11/07/25 14:03:53.875] -sepShanks=0,0,1,2,-1    ;save each shank in sep file (ip,ip0,ip1,ip2,ip3)
+[Thd 29996 CPU 2 11/07/25 14:03:53.891] -maxZ=0,0,100            ;probe inserted to given depth (ip,depth-type,depth-value)
+[Thd 29996 CPU 2 11/07/25 14:03:53.891] -pass1_force_ni_ob_bin   ;write pass one ni/ob binary tcat file even if not changed
+[Thd 29996 CPU 2 11/07/25 14:03:53.891] -supercat={dir,run_ga}   ;concatenate existing output files across runs (see ReadMe)
+[Thd 29996 CPU 2 11/07/25 14:03:53.891] -supercat_trim_edges     ;supercat after trimming each stream to matched sync edges
+[Thd 29996 CPU 2 11/07/25 14:03:53.891] -supercat_skip_ni_ob_bin ;do not supercat ni/ob binary files
+[Thd 29996 CPU 2 11/07/25 14:03:53.891] -dest=path               ;alternate path for output files (must exist)
+[Thd 29996 CPU 2 11/07/25 14:03:53.891] -no_catgt_fld            ;if using -dest, do not create catgt_run subfolder
+[Thd 29996 CPU 2 11/07/25 14:03:53.891] -out_prb_fld             ;if using -dest, create output subfolder per probe
+[Thd 29996 CPU 2 11/07/25 14:03:53.891] ------------------------
+[Thd 29996 CPU 6 11/07/25 14:03:53.891] 
