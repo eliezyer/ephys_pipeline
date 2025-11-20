@@ -12,6 +12,7 @@ from datetime import datetime
 import sys, os
 import numpy as np
 import pandas as pd
+import json
 # to run catgt from python
 import subprocess
 # to make the channel map
@@ -51,6 +52,8 @@ run_buzcode = True
 # these only matter if running buzcode
 generate_lfp = True
 find_ripples = True
+find_SWRs = True # this will use existing ripples if present, otherwise it will detect them
+best_SW_channel = 44 # IMPLEMENT AUTO DETECTION OF BEST SW CHANNEL
 find_sleep_states = True
 
 
@@ -85,19 +88,19 @@ region_df_NPX3 = pd.DataFrame({
 y_lim_channel_groups = 106 # allows for 5 empty sites between channel groups
 x_lim_channel_groups = 50 # 
 
-# if kilosort hasn't generated the file yet, specify a folder that 
-# contains the channel_positions.npy file
-alternative_channel_position_path = None 
-
 template_xml_path = 'sample_xml_neuroscope.xml' # path to xml template  to use for generating the new one
 #%%
-for day in days_to_analyze: # loop through each day
+for day in days_to_analyze: # loop through each day/session
     current_day_path = Path(data_basepath, day) # path to the day
+    # create supercat folder if it doesnt exist 
+    supercat_folder = Path(current_day_path, 'supercat')
+    if not os.path.exists(supercat_folder):
+        os.mkdir(supercat_folder)
 
     if analyze_all_sessions: # get all folder names from that day
         sessions_to_analyze = [session for session in os.listdir(current_day_path) if os.path.isdir(Path(current_day_path, session))]
     
-    for session in sessions_to_analyze: # loop through each session # NEED TO IMPLEMENT CATGT CONCAT OPTION
+    for session in sessions_to_analyze: # loop through each recording # NEED TO IMPLEMENT CATGT CONCAT OPTION
         basepath = Path(current_day_path, session,(session + '_imec0')) # path to the session
         print(f"Processing: {basepath}")
 
@@ -148,11 +151,74 @@ for day in days_to_analyze: # loop through each day
             # run CatGT
             result = subprocess.run(cmd,capture_output=True,text=True)
 
+            # also generate channelmap file for kilosort and xml file generation # CHANGE TO USE SUPERCAT FOLDER
+            MetaToCoords(metaFullPath=catgt_meta_file, destFullPath=supercat_folder, outType=5, showPlot=False) # outType 5 is for kilosort json
+
             if result.returncode !=0:
                 raise ValueError("CatGt failed")
+            print(f"Successfully ran CatGT")
+
+        # NOT FULLY TESTED YET
+        if generate_xml:
+            # check if json file exists
+            if not os.path.exists(Path(supercat_folder, '*.json')):
+                raise FileNotFoundError(f"JSON file {Path(supercat_folder, '*.json')} does not exist - run catgt first")
+            # load file ending in chanmap.json in supercat folder 
+            json_file_path = list(supercat_folder.glob('*chanmap.json'))[0]
+            with open(json_file_path, 'r') as f:
+                temp = json.load(f)
+            # extract channel positions from json file
+            channel_positions = np.array([temp['xc'], temp['yc']]).T
+
+            # find which animal we are dealing with
+            if 'NPX1' in session:
+                animal_name = 'NPX1'
+                region_df = region_df_NPX1
+            elif 'NPX2' in session:
+                animal_name = 'NPX2'
+                region_df = region_df_NPX2
+            elif 'NPX3' in session:
+                animal_name = 'NPX3'
+                region_df = region_df_NPX3
+
+            channel_groups, region_names = get_channel_groups_with_regions(channel_positions, region_df=region_df, 
+            x_threshold=x_lim_channel_groups, y_threshold=y_lim_channel_groups)
+
+            generate_xml_with_channel_groups(
+                template_xml_path=template_xml_path,
+                output_xml_path=Path(supercat_folder, 'neuroscope.xml'),
+                channel_groups=channel_groups,
+                group_regions=region_names,
+            )
+            print(f"Successfully generated XML file: {Path(supercat_folder, 'neuroscope.xml')}")
 
         if run_kilosort:
+            
+            # get channel groups from xml file to run CAR separately for each channel group
+            xml_file_path = Path(supercat_folder, 'neuroscope.xml')
+            if not os.path.exists(xml_file_path):
+                raise FileNotFoundError(f"XML file {xml_file_path} does not exist - run generate_xml first")
 
+            # parse XML file to extract channel groups for *all* regions
+            tree = ET.parse(xml_file_path)
+            root = tree.getroot()
+
+            region_channels = {}
+            brain_regions = root.find('brainRegions')
+
+            # iterate over all region elements inside <brainRegions>
+            for region_elem in brain_regions:
+                region_name = region_elem.tag 
+                channels_element = region_elem.find('channels')
+                if channels_element is None or not channels_element.text:
+                    # skip regions without a channels entry
+                    continue
+
+                # parse space-separated channel numbers into ints
+                channels = [int(ch) for ch in channels_element.text.split()]
+                region_channels[region_name] = channels
+
+            
             # # get the output file of catgt as the file to spike sort
             catgt_binary_file = list(catgt_bin_folder.glob("*.ap.bin"))[0]
             catgt_meta_file = list(catgt_bin_folder.glob("*.ap.meta"))[0] # not sure this is necessary anymore
@@ -189,32 +255,7 @@ for day in days_to_analyze: # loop through each day
         if run_bombcell:
             print("not implemented yet")
 
-        # NOT FULLY TESTED YET
-        if generate_xml:
-            if alternative_channel_position_path is not None:
-                channel_positions = np.load(alternative_channel_position_path)
-            else: # get channel positions from the kilosort folder 
-                channel_positions = np.load(Path(list(catgt_bin_folder.glob('kilosort*'))[0], 'channel_positions.npy'))
 
-            # find which animal we are dealing with
-            if 'NPX1' in session:
-                animal_name = 'NPX1'
-                region_df = region_df_NPX1
-            elif 'NPX2' in session:
-                animal_name = 'NPX2'
-                region_df = region_df_NPX2
-            elif 'NPX3' in session:
-                animal_name = 'NPX3'
-                region_df = region_df_NPX3
-
-            channel_groups, region_names = get_channel_groups_with_regions(channel_positions, region_df=region_df, x_threshold=50, y_threshold=50)
-
-            generate_xml_with_channel_groups(
-                template_xml_path=template_xml_path,
-                output_xml_path=Path(str(basepath.parent), animal_name, 'neuroscope.xml'),
-                channel_groups=channel_groups,
-                group_regions=region_names,
-            )
         # NOT TESTED YET
         if run_buzcode:
             eng = matlab.engine.start_matlab() # start matlab engine
@@ -222,7 +263,7 @@ for day in days_to_analyze: # loop through each day
             if generate_lfp:
             # generate LFP at 1250Hz
                 eng.ResampleBinary(original_binary_file,basename+'_1250Hz.lfp',385,1,24) #30000 Hz to 1250 Hz
-            
+                print(f"Successfully generated LFP file: {basename+'_1250Hz.lfp'}")
             if find_ripples:
                 # check that lfp file exists 
                 if not os.path.exists(basename+'_1250Hz.lfp'):
@@ -258,7 +299,7 @@ for day in days_to_analyze: # loop through each day
 
                 # get best ripple channel from all hpc channels
                 ripple_channel = eng.bz_GetBestRippleChan(basename+'_1250Hz.lfp', hpc_channels)
-
+                print(f"Best ripple channel: {ripple_channel}")
 
                 # find ripples
                 ### input parameters ###
@@ -283,9 +324,114 @@ for day in days_to_analyze: # loop through each day
                 eng.bz_FindRipples(basename+'_1250Hz.lfp', ripple_channel,
                 'thresholds', [2.5, 4], 'durations', [30, 100], 'minDuration', 10, 'noise', 282, 'passband', [100, 250],
                 'EMGThresh', 0.8, 'saveMat', True)
+                print(f"Successfully extracted ripples from {basename+'_1250Hz.lfp'}")
+            
+            
+            if find_SWRs:
+                                # check that lfp file exists 
+                if not os.path.exists(basename+'_1250Hz.lfp'):
+                    raise FileNotFoundError(f"LFP file {basename+'_1250Hz.lfp'} does not exist")
+                # check that xml file exists (to get channel numbers)
+                xml_file_path = Path(str(basepath.parent), animal_name, 'neuroscope.xml')
+                if not os.path.exists(xml_file_path):
+                    raise FileNotFoundError(f"XML file {xml_file_path} does not exist")
+                
+                # parse XML file to extract hippocampal channels
+                tree = ET.parse(xml_file_path)
+                root = tree.getroot()
+                
+                # list of possible hippocampal region names to search for - Case sensitive!
+                hpc_region_names = ['CA1', 'CA2', 'CA3', 'DG', 'HPC', 'Hippocampus']
+                
+                # find hippocampal channels in brainRegions section
+                hpc_channels = []
+                brain_regions = root.find('brainRegions')
+                if brain_regions is not None:
+                    for region_name in hpc_region_names:
+                        hpc_element = brain_regions.find(region_name)
+                        if hpc_element is not None:
+                            channels_element = hpc_element.find('channels')
+                            if channels_element is not None and channels_element.text:
+                                # parse space-separated channel numbers
+                                hpc_channels = [int(ch) for ch in channels_element.text.split()]
+                                print(f"Found {len(hpc_channels)} hippocampal channels in region '{region_name}'")
+                                break
+                
+                if not hpc_channels:
+                    raise ValueError(f"No hippocampal channels found in XML file. Searched for regions: {hpc_region_names}")
+
+                # get best ripple channel from all hpc channels
+                ripple_channel = eng.bz_GetBestRippleChan(basename+'_1250Hz.lfp', hpc_channels)
+                print(f"Best ripple channel: {ripple_channel}")
+                print(f"Best SW channel: {best_SW_channel}")
+
+                #  Channels:     an array of two channel IDs following LoadBinary format (base 1)
+                #                First RIPPLE channel, and second the SHARP WAVE channel.
+                #                Detection in based on these order, please be careful
+                #                E.g. [1 11]
+                # 
+                #  All following inputs are optional:
+                # 
+                #  basepath:     full path where session is located (default pwd)
+                #                e.g. /mnt/Data/buddy140_060813_reo/buddy140_060813_reo
+                # 
+                #  Epochs:       a list of time stamps [start stop] in seconds demarcating 
+                #                epochs in which to detect SWR. If this argument is empty, 
+                #                the entire .lfp/.lfp file will be used.               
+                # 
+                #  saveMat:      logical (default=false) to save in buzcode format
+                # 
+                #  forceDetect   true or false to force detection (avoid load previous 
+                #                detection, default false)
+                # 
+                #  swBP:         [low high], passband for filtering sharp wave activity
+                #  
+                #  ripBP:        [low high] passband for filtering around ripple activity
+                #  
+                #  per_thresswD: a threshold placed upon the sharp wave difference magnitude
+                #                of the candidate SWR cluster determined via k-means.
+                #  per_thresRip: a threshold placed upon ripple power based upon the non-SWR
+                #                cluster determined via k-means.
+                #  
+                #  WinSize:      window size in milliseconds for non-overlapping detections
+                #  
+                #  Ns_chk:       sets a window [-Ns_chk, Ns_chk] in seconds around a
+                #                candidate SWR detection for estimating local statistics.
+                #  
+                #  thresSDswD:   [low high], high is a threshold in standard deviations upon
+                #                the detected maximum sharp wave difference magnitude, based
+                #                upon the local distribution. low is the cutoff for the 
+                #                feature around the detected peak for determining the 
+                #                duration of the event, also based upon the local
+                #                distribution.
+                #  
+                #  thresSDrip:   [low high], high is a threshold in standard deviations upon
+                #                the detected maximum ripple magnitude, based
+                #                upon the local distribution. low is the cutoff for the 
+                #                feature around the detected peak for determining the 
+                #                duration of the event, also based upon the local
+                #                distribution.
+                #  minIsi:       a threshold setting the minimum time between detections in
+                #                seconds.
+                #  
+                #  minDurSW:     a threshold setting the minimum duration of a localized
+                #                sharp-wave event.
+                # 
+                #  maxDurSW:     a threshold setting the maximum duration of a localized
+                #                sharp-wave event.
+                # 
+                #  minDurRP:     a threshold setting the minimum duration of a localized
+                #                ripple event associated with a sharp-wave.
+                #      
+                #  EVENTFILE:    boolean, a flag that triggers whether or not to write out
+                #                an event file corresponding to the detections (for
+                #                inspection in neuroscope).
+                #  noPrompts     true/false disable any user prompts (default: true)
+                # 
+                eng.bz_DetectSWR(basepath = basename, Channels = [ripple_channel, best_SW_channel], saveMat=True, EVENTFILE=True)
+                print(f"Successfully extracted SWRs from {basename+'_1250Hz.lfp'}")
 
             if find_sleep_states:
-
                 # check that lfp file exists 
                 if not os.path.exists(basename+'_1250Hz.lfp'):
                     raise FileNotFoundError(f"LFP file {basename+'_1250Hz.lfp'} does not exist")
@@ -355,3 +501,4 @@ for day in days_to_analyze: # loop through each day
                 #    'noPrompts'     (default:false) an option to not prompt user of things
 
                 eng.SleepScoreMaster(basename, 'ThetaChannels', region_channels, 'SWChannels', region_channels)
+                print(f"Successfully extracted sleep states from {basename+'_1250Hz.lfp'}")
