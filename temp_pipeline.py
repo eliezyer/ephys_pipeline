@@ -20,9 +20,8 @@ sys.path.append('utils')
 from SGLXMetaToCoords import MetaToCoords
 from get_channel_groups import get_channel_groups_with_regions
 from generate_xml_with_channel_groups import generate_xml_with_channel_groups
-# to parse xml files
-import xml.etree.ElementTree as ET
-
+from get_channel_groups_from_xml import get_all_channel_groups_from_xml
+from get_channel_groups_from_xml import get_subset_channels_from_xml
 # to run buzcode functions
 import matlab.engine
 
@@ -194,31 +193,10 @@ for day in days_to_analyze: # loop through each day/session
 
         if run_kilosort:
             
-            # get channel groups from xml file to run CAR separately for each channel group
             xml_file_path = Path(supercat_folder, 'neuroscope.xml')
-            if not os.path.exists(xml_file_path):
-                raise FileNotFoundError(f"XML file {xml_file_path} does not exist - run generate_xml first")
+            region_channels = get_all_channel_groups_from_xml(xml_file_path) # returns a dict with region names associated with channels
+            region_channels_list = list(region_channels.values()) # just need a list for kilosort
 
-            # parse XML file to extract channel groups for *all* regions
-            tree = ET.parse(xml_file_path)
-            root = tree.getroot()
-
-            region_channels = {}
-            brain_regions = root.find('brainRegions')
-
-            # iterate over all region elements inside <brainRegions>
-            for region_elem in brain_regions:
-                region_name = region_elem.tag 
-                channels_element = region_elem.find('channels')
-                if channels_element is None or not channels_element.text:
-                    # skip regions without a channels entry
-                    continue
-
-                # parse space-separated channel numbers into ints
-                channels = [int(ch) for ch in channels_element.text.split()]
-                region_channels[region_name] = channels
-
-            
             # # get the output file of catgt as the file to spike sort
             catgt_binary_file = list(catgt_bin_folder.glob("*.ap.bin"))[0]
             catgt_meta_file = list(catgt_bin_folder.glob("*.ap.meta"))[0] # not sure this is necessary anymore
@@ -250,7 +228,7 @@ for day in days_to_analyze: # loop through each day/session
             ks_folder_save_name = catgt_bin_folder / Path('kilosort4_'+date_time)
             # running kilosort
             ops, st, clu, tF, Wall, similar_templates, is_ref, est_contam_rate, kept_spikes = \
-                run_kilosort(settings=settings, probe=probe_dict,results_dir=ks_folder_save_name)
+                run_kilosort(settings=settings, probe=probe_dict,results_dir=ks_folder_save_name, channel_groups=region_channels_list)
 
         if run_bombcell:
             print("not implemented yet")
@@ -270,33 +248,7 @@ for day in days_to_analyze: # loop through each day/session
                     raise FileNotFoundError(f"LFP file {basename+'_1250Hz.lfp'} does not exist")
                 # check that xml file exists (to get channel numbers)
                 xml_file_path = Path(str(basepath.parent), animal_name, 'neuroscope.xml')
-                if not os.path.exists(xml_file_path):
-                    raise FileNotFoundError(f"XML file {xml_file_path} does not exist")
-                
-                # parse XML file to extract hippocampal channels
-                tree = ET.parse(xml_file_path)
-                root = tree.getroot()
-                
-                # list of possible hippocampal region names to search for - Case sensitive!
-                hpc_region_names = ['CA1', 'CA2', 'CA3', 'DG', 'HPC', 'Hippocampus']
-                
-                # find hippocampal channels in brainRegions section
-                hpc_channels = []
-                brain_regions = root.find('brainRegions')
-                if brain_regions is not None:
-                    for region_name in hpc_region_names:
-                        hpc_element = brain_regions.find(region_name)
-                        if hpc_element is not None:
-                            channels_element = hpc_element.find('channels')
-                            if channels_element is not None and channels_element.text:
-                                # parse space-separated channel numbers
-                                hpc_channels = [int(ch) for ch in channels_element.text.split()]
-                                print(f"Found {len(hpc_channels)} hippocampal channels in region '{region_name}'")
-                                break
-                
-                if not hpc_channels:
-                    raise ValueError(f"No hippocampal channels found in XML file. Searched for regions: {hpc_region_names}")
-
+                hpc_channels = get_subset_channels_from_xml(xml_file_path, region='hpc')
                 # get best ripple channel from all hpc channels
                 ripple_channel = eng.bz_GetBestRippleChan(basename+'_1250Hz.lfp', hpc_channels)
                 print(f"Best ripple channel: {ripple_channel}")
@@ -333,32 +285,7 @@ for day in days_to_analyze: # loop through each day/session
                     raise FileNotFoundError(f"LFP file {basename+'_1250Hz.lfp'} does not exist")
                 # check that xml file exists (to get channel numbers)
                 xml_file_path = Path(str(basepath.parent), animal_name, 'neuroscope.xml')
-                if not os.path.exists(xml_file_path):
-                    raise FileNotFoundError(f"XML file {xml_file_path} does not exist")
-                
-                # parse XML file to extract hippocampal channels
-                tree = ET.parse(xml_file_path)
-                root = tree.getroot()
-                
-                # list of possible hippocampal region names to search for - Case sensitive!
-                hpc_region_names = ['CA1', 'CA2', 'CA3', 'DG', 'HPC', 'Hippocampus']
-                
-                # find hippocampal channels in brainRegions section
-                hpc_channels = []
-                brain_regions = root.find('brainRegions')
-                if brain_regions is not None:
-                    for region_name in hpc_region_names:
-                        hpc_element = brain_regions.find(region_name)
-                        if hpc_element is not None:
-                            channels_element = hpc_element.find('channels')
-                            if channels_element is not None and channels_element.text:
-                                # parse space-separated channel numbers
-                                hpc_channels = [int(ch) for ch in channels_element.text.split()]
-                                print(f"Found {len(hpc_channels)} hippocampal channels in region '{region_name}'")
-                                break
-                
-                if not hpc_channels:
-                    raise ValueError(f"No hippocampal channels found in XML file. Searched for regions: {hpc_region_names}")
+                hpc_channels = get_subset_channels_from_xml(xml_file_path, region='hpc')
 
                 # get best ripple channel from all hpc channels
                 ripple_channel = eng.bz_GetBestRippleChan(basename+'_1250Hz.lfp', hpc_channels)
@@ -437,24 +364,9 @@ for day in days_to_analyze: # loop through each day/session
                     raise FileNotFoundError(f"LFP file {basename+'_1250Hz.lfp'} does not exist")
                 # check that xml file exists (to get channel numbers)
                 xml_file_path = Path(str(basepath.parent), animal_name, 'neuroscope.xml')
-                if not os.path.exists(xml_file_path):
-                    raise FileNotFoundError(f"XML file {xml_file_path} does not exist")
-                
-                # list of possible region names to search for - in order of preference! 
-                # HPC > CTX > TH for SW and theta channels - Case sensitive!
-                region_names = ['CA1', 'CA2', 'CA3', 'DG', 'HPC', 'Hippocampus', 
-                'CTX', 'ACC', 'PFC','Cortex', 'TH', 'AM', 'MDT', 'Thalamus']
-                
-                # find channels in brainRegions section
-                region_channels = []
-                for region_name in region_names:
-                    region_element = brain_regions.find(region_name)
-                    if region_element is not None:
-                        channels_element = region_element.find('channels')
-                        if channels_element is not None and channels_element.text:
-                            # parse space-separated channel numbers
-                            region_channels = [int(ch) for ch in channels_element.text.split()]
 
+                # finds channels for HPC > CTX > TH for SW and theta channels 
+                region_channels = get_subset_channels_from_xml(xml_file_path, region='all')
                 # find sleep states
                 ### input parameters ###
                 #    basePath        folder containing .xml and .lfp files.

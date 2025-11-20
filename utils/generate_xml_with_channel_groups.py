@@ -148,46 +148,5 @@ def generate_xml_with_channel_groups(template_xml_path, output_xml_path, channel
     total_channels = sum(len(g) for g in channel_groups)
     print(f"Total channels: {total_channels}")
 
-if __name__ == '__main__':
-    # Example usage - update paths as needed
-    
-    # Generate XML for NPX3 channel groups
-    # Uncomment and update the path to your channel_positions.npy file
-    # generate_xml_with_channel_groups(
-    #     template_xml_path='sample_xml_neuroscope.xml',
-    #     output_xml_path='NPX3_neuroscope_with_channel_groups.xml',
-    #     npy_path='/path/to/your/channel_positions.npy',
-    #     x_threshold=50,
-    #     y_threshold=50
-    # )
-    
-    print("Usage examples:")
-    print("\n# Example 1: Assign brain regions to channel groups")
-    print("# If 5 channel groups are detected, provide a list of 5 region names")
-    print("generate_xml_with_channel_groups(")
-    print("    template_xml_path='sample_xml_neuroscope.xml',")
-    print("    output_xml_path='output.xml',")
-    print("    npy_path='/path/to/channel_positions.npy',")
-    print("    date='2025-11-17',")
-    print("    group_regions=['CA1', 'CA3', 'PFC', 'TH', 'ACC']  # One per group")
-    print(")")
-    print("\n# Example 2: Same region for multiple groups")
-    print("# If groups 0,1,2 are all in CA1, and groups 3,4 are in PFC:")
-    print("generate_xml_with_channel_groups(")
-    print("    template_xml_path='sample_xml_neuroscope.xml',")
-    print("    output_xml_path='output.xml',")
-    print("    npy_path='/path/to/channel_positions.npy',")
-    print("    group_regions=['CA1', 'CA1', 'CA1', 'PFC', 'PFC']")
-    print(")")
-    print("\n# This generates:")
-    print("# <brainRegions>")
-    print("#   <CA1>")
-    print("#     <channels>0 1 2 3 4 5 6 7 8</channels>  (all channels from groups 0,1,2)")
-    print("#     <electrodeGroups>0 1 2</electrodeGroups>")
-    print("#   </CA1>")
-    print("#   <PFC>")
-    print("#     <channels>9 10 11 12</channels>  (all channels from groups 3,4)")
-    print("#     <electrodeGroups>3 4</electrodeGroups>")
-    print("#   </PFC>")
-    print("# </brainRegions>")
+
 
