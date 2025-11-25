@@ -1,0 +1,27 @@
+[Thd 50396 CPU 2 11/25/25 15:16:50.554] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_17_25_P1/finalcat -run=_ -g=0 -t=1 -ob -obx=0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 50396 CPU 2 11/25/25 15:16:50.556] Meta file not found 'C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_17_25_P1/finalcat/__g0/__g0_t1.obx0.obx.meta'.
+[Thd 50396 CPU 2 11/25/25 15:16:50.556] Couldn't open metafile for writing, error 5 'C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_17_25_P1/finalcat/__g0/__g0_fyi.txt'.
+[Thd 50396 CPU 2 11/25/25 15:16:50.556] 
+[Thd 50476 CPU 2 11/25/25 15:55:47.447] Unknown option or wrong param count for option '-xd=1'.
+[Thd 50476 CPU 2 11/25/25 15:55:47.447] 
+[Thd 47784 CPU 2 11/25/25 15:57:11.702] Unknown option or wrong param count for option '-xd=1'.
+[Thd 47784 CPU 2 11/25/25 15:57:11.703] 
+[Thd 35648 CPU 2 11/25/25 15:58:19.912] Unknown option or wrong param count for option '-xd=1'.
+[Thd 35648 CPU 2 11/25/25 15:58:19.913] 
+[Thd 30200 CPU 4 11/25/25 15:58:35.621] Unknown option or wrong param count for option '-xd=1'.
+[Thd 30200 CPU 4 11/25/25 15:58:35.622] 
+[Thd 26168 CPU 10 11/25/25 16:00:16.159] Unknown option or wrong param count for option '-xd=1'.
+[Thd 26168 CPU 10 11/25/25 16:00:16.160] 
+[Thd 50468 CPU 2 11/25/25 16:00:27.422] Unknown option or wrong param count for option '-xd=1'.
+[Thd 50468 CPU 2 11/25/25 16:00:27.423] 
+[Thd 48724 CPU 2 11/25/25 16:03:44.011] Unknown option or wrong param count for option '-xd=0'.
+[Thd 48724 CPU 2 11/25/25 16:03:44.012] 
+[Thd 41652 CPU 10 11/25/25 16:05:57.993] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_17_25_P1/finalcat -run=NPX3_11_17_25_offline2_CA_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0
+[Thd 41652 CPU 3 11/25/25 16:05:59.790] Done obx0: tcat.
+[Thd 41652 CPU 2 11/25/25 16:05:59.790] 
+[Thd 33204 CPU 2 11/25/25 16:08:08.114] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_17_25_P1/finalcat -run=NPX3_11_17_25_offline2_CA_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xd=1,0,5,4,0 -xid=1,0,5,5,0
+[Thd 33204 CPU 21 11/25/25 16:08:10.051] Done obx0: tcat.
+[Thd 33204 CPU 21 11/25/25 16:08:10.057] 
+[Thd 50916 CPU 4 11/25/25 16:09:15.954] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_17_25_P1/finalcat -run=NPX3_11_17_25_offline2_CA_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 50916 CPU 5 11/25/25 16:09:17.842] Done obx0: tcat.
+[Thd 50916 CPU 5 11/25/25 16:09:17.842] 

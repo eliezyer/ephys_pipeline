@@ -15,12 +15,13 @@ from purrito import CatGt_wrapper
 from kilosort import run_kilosort, DEFAULT_SETTINGS
 from kilosort.io import load_probe
 from datetime import datetime
-
+import csv
 import numpy as np
 import pandas as pd
 import json
 
 from SGLXMetaToCoords import MetaToCoords
+from SGLXMetaToCoords import readMeta
 from get_channel_groups import get_channel_groups_with_regions
 from generate_xml_with_channel_groups import generate_xml_with_channel_groups
 from get_channel_groups_from_xml import get_all_channel_groups_from_xml
@@ -34,7 +35,7 @@ catgt_path = Path(r'C:\Users\Josue Regalado\Documents\EFO_temp_code\utils\J_CatG
 data_basepath = Path(r'C:\Users\Josue Regalado\ephys_temp_data')
 
 # [CHANGE ONLY THESE VARIABLES UP HERE]
-days_to_analyze = [r'NPX1\10_27_2025']
+days_to_analyze = [r'NPX3\11_17_25_P1']
 
 # for testing on mac
 # catgt_path = Path(r'C:/Users/Josue Regalado/Documents/EFO_temp_code/utils/J_CatGT-win/CatGT.exe')
@@ -51,7 +52,7 @@ generate_xml = True # generates an xml file for easy data loading into neuroscop
 spikesort = True 
 car_separately = True # if True, will CAR separately for each channel group
 sort_seperatly = True # if True, will run kilosort separately for each channel group
-run_bombcell = True 
+run_bombcell = False 
 run_buzcode = False # generates LFP, finds sleep states and ripples, SWRs (only for HPC)
 # these only matter if running buzcode
 generate_lfp = True
@@ -113,6 +114,15 @@ for day in days_to_analyze: # loop through each day/session
     # exluce finalcat folder from sessions_to_analyze
     sessions_to_analyze = np.array(sessions_to_analyze)
     sessions_to_analyze = np.delete(sessions_to_analyze, np.where(sessions_to_analyze == 'finalcat')[0])
+
+    Recording_start_times = []
+    # sort sessions in chronological order 
+    for tmp_sess in sessions_to_analyze:
+        tmp_meta_file = list(Path(current_day_path, tmp_sess, tmp_sess +'_imec0').glob('*ap.meta'))[0]
+        tmp_meta_file = readMeta(tmp_meta_file)
+        Recording_start_times.append(tmp_meta_file['fileCreateTime'])
+    sessions_to_analyze = sessions_to_analyze[np.argsort(Recording_start_times)]
+    Recording_start_times = np.sort(Recording_start_times) # also sort the times because we will save them in a csv in case we need them later
     dir_runs = []
     for_cleanup = []
     #%% running catgt on each session individually, then supercat to concatenate everything
@@ -120,7 +130,9 @@ for day in days_to_analyze: # loop through each day/session
         # for loop, each session run
         for i, session in enumerate(sessions_to_analyze): # loop through each recording 
             run_name = session[:-3] # removes _g0
+
             os.chdir(Path(current_day_path, session, session +'_imec0')) # change cwd so that the CatGT log is saved there
+            print('CatGT is processing: ' + run_name)
             for_cleanup.append(Path(current_day_path, session, session +'_imec0'))
             if i==0:
             # intializing CatGt wrapper
@@ -131,12 +143,12 @@ for day in days_to_analyze: # loop through each day/session
                 )
                 # setting input and streams
                 catgt.set_input(prb=0, prb_fld=True) # setting input probe and probe field
-                #catgt.set_streams(ap=True,ob=True,obx=0) #obx has to be set if processing onebox
-                catgt.set_streams(ap=True,ob=False)
+                catgt.set_streams(ap=True,ob=True,obx=0) #obx has to be set if processing onebox
+                #catgt.set_streams(ap=True,ob=False)
                 catgt.set_options({'t_miss_ok':True,# setting other options
                                 'no_catgt_fld':True,
                                 'gfix':'0.4,0.1,0.02',
-                                'pass1_force_ni_ob_bin':False}) #pass1_force_ni_ob_bin is required to force make a tcat ob file to then concatenate everything
+                                'pass1_force_ni_ob_bin':True}) #pass1_force_ni_ob_bin is required to force make a tcat ob file to then concatenate everything
                 # running catgt for each session separately
                 catgt.run()
             else:
@@ -156,32 +168,44 @@ for day in days_to_analyze: # loop through each day/session
         #%% running supercat to concatenate all sessions together
         # do we need to include trim_edges = true or is it true by defaulT????
         os.chdir(supercat_folder) # so that catgt log is saved here
+        print('SuperCatting...')
         catgt_sc = CatGt_wrapper(catgt_path=catgt_path,basepath=current_day_path) # basepath here doesn't matter, it is just required
-        #catgt_sc.set_streams(ap=True,ob=True,obx=0) #obx has to be set if processing onebox (required)
-        catgt_sc.set_streams(ap=True,ob=False) #obx has to be set if processing onebox (required)
+        catgt_sc.set_streams(ap=True,ob=True,obx=0) #obx has to be set if processing onebox (required)
+        #catgt_sc.set_streams(ap=True,ob=False) #obx has to be set if processing onebox (required)
         catgt_sc.set_input(prb=0, prb_fld=True) # setting input probe and probe field
         catgt_sc.set_supercat(runs=dir_runs,dest=supercat_folder)
 
         catgt_sc.run()
 
-        #%% extra processing can be added here: e.g. extracting the TTLs from the obx.bin channels
+        
 
-        # TODO: [ ] test extraction on obx files alone, on multiple channels
-        # NOT TESTED YET
-        # run_name_finalcat = ... #this needs completion
-        # catgt_ob = CatGt_wrapper(catgt_path=catgt_path,basepath=supercat_folder,run_name=run_name_finalcat) # basepath here doesn't matter, it is just required
+        supercat_folder = list(supercat_folder.glob("*g0"))[0] # go into folder created in finalcat
 
-        # catgt_ob.set_streams(ob=True,obx=0) #obx has to be set if processing onebox (required)
-        # catgt_ob.set_options({'xd:1,0,-1,0,0'}) # for bit index 0
-        # catgt_ob.run()
-    
+        # remove 'supercat' from folder name - necessary to run catGT TTL extraction later....... 
+        os.rename(supercat_folder, Path(supercat_folder.parent, supercat_folder.stem[9:]))
+
+        run_name_finalcat = supercat_folder.stem[:-3] #remove _g0
+        catgt_ob = CatGt_wrapper(catgt_path=str(catgt_path),basepath=supercat_folder.parent,run_name=run_name_finalcat, trigger='cat')
+
+        catgt_ob.set_streams(ob=True,obx=0) #obx has to be set if processing onebox (required)
+        #1,0 obx specific; 5 because we want the digital channel, then it's ttl idx, then min duration for ttl pulse
+        #(onebox always records analog even if using digital ttls. so 0-4 are the analog channels for the 5 ttl pulses, 5 is the digital channel 
+        #(where analog channels have been converted to different bits in the digital channel), 6 the sync channel- which is extracted automatically)
+        catgt_ob.set_extraction(xd =["1,0,5,0,0", "1,0,5,1,0","1,0,5,2,0","1,0,5,3,0"], xid =["1,0,5,4,0"] ) # puff, cue, rf, lick, cam (inverse!)
+        catgt_ob.run()
+                                        
         # also generate channelmap file for kilosort and xml file generation
-        supercat_folder = list(supercat_folder.glob("supercat*"))[0] # go into folder created in finalcat
-        catgt_meta_file = list(supercat_folder.glob('*ap.meta'))[0]
-        _ = MetaToCoords(metaFullPath=Path(catgt_meta_file), destFullPath=str(list(supercat_folder.glob("supercat*"))[0]), outType=5, showPlot=False) # outType 5 is for kilosort json
 
+        catgt_meta_file = list(supercat_folder.glob('*ap.meta'))[0]
+        _ = MetaToCoords(metaFullPath=Path(catgt_meta_file), destFullPath=str(supercat_folder), outType=5, showPlot=False) # outType 5 is for kilosort json
+
+        # also save recording start times in a csv 
+
+        with open(str(supercat_folder) + '\RecordingStartTimes.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(Recording_start_times)
         # remove catgt files for individual sessions after supercat
-        for s in for_cleanup:
+        for s in for_cleanup:   
             temp_bin = list(s.glob("*tcat.imec0.ap.bin"))[0]
             temp_meta = list(s.glob("*tcat.imec0.ap.meta"))[0] 
             temp_catlog = list(s.glob("CatGT.log"))[0] 
@@ -190,7 +214,7 @@ for day in days_to_analyze: # loop through each day/session
             os.remove(temp_meta)
             os.remove(temp_catlog)
             os.remove(temp_sync_file)
-
+        
     if generate_xml:
         try:
             # load file ending in chanmap.json in supercat folder 
