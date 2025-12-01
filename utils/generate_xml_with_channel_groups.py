@@ -11,7 +11,7 @@ def prettify_xml(elem):
     return '\n'.join(lines) + '\n'
 
 def generate_xml_with_channel_groups(template_xml_path, output_xml_path, channel_groups,  
-                                      date=None, group_regions=None):
+                                      date=None, group_regions=None, channel_positions=None):
     """Generate a new XML file with channel groups identified by get_channel_groups function.
     
     Args:
@@ -21,6 +21,7 @@ def generate_xml_with_channel_groups(template_xml_path, output_xml_path, channel
         date: Optional date string to set in the XML (format: YYYY-MM-DD)
         group_regions: Optional list of brain region names, one per channel group. 
                        Must match the number of detected groups. E.g. ['CA1', 'CA3', 'PFC', 'TH', 'ACC']
+        channel_positions: Optional array of shape (N, 2) containing x, y coordinates for each channel
     """
     
     print(f"\nGenerating XML with {len(channel_groups)} channel groups")
@@ -134,6 +135,25 @@ def generate_xml_with_channel_groups(template_xml_path, output_xml_path, channel
                 print("Warning: nChannels not found in acquisitionSystem")
         else:
             print("Warning: acquisitionSystem section not found")
+    
+    # Add channel positions if provided
+    if channel_positions is not None:
+        # Remove existing channelPositions section if present
+        channel_positions_elem = root.find('channelPositions')
+        if channel_positions_elem is not None:
+            root.remove(channel_positions_elem)
+        
+        # Create new channelPositions element
+        channel_positions_elem = ET.SubElement(root, 'channelPositions')
+        
+        # Add x coordinates as space-separated values
+        x_elem = ET.SubElement(channel_positions_elem, 'x')
+        x_elem.text = ' '.join(str(pos[0]) for pos in channel_positions)
+        
+        # Add y coordinates as space-separated values
+        y_elem = ET.SubElement(channel_positions_elem, 'y')
+        y_elem.text = ' '.join(str(pos[1]) for pos in channel_positions)
+        
     
     # Write the new XML
     # Using prettify for better formatting

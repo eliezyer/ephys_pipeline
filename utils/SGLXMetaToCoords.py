@@ -24,10 +24,9 @@ The output is set by the outType parameter:
 import numpy as np
 import scipy.io
 import matplotlib.pyplot as plt
-from kilosort.io import save_probe
 from pathlib import Path
 import shutil
-
+import json
 # =========================================================
 # Parse ini file returning a dictionary whose keys are the metadata
 # left-hand-side-tags, and values are string versions of the right-hand-side
@@ -691,7 +690,52 @@ def MetaToCoords(metaFullPath, outType, badChan= np.zeros((0), dtype = 'int'), d
     
     return xCoord, yCoord, shankInd, connected, NchanTOT
 
+def save_probe(probe_dict, filepath):
+    """Save a probe dictionary to a .json text file.
 
+    Parameters
+    ----------
+    probe_dict : dict
+        A dictionary containing probe information in the format expected by
+        Kilosort4, with keys 'chanMap', 'xc', 'yc', and 'kcoords'.
+    filepath : str or pathlib.Path
+        Location where .json file should be stored.
+
+    Raises
+    ------
+    RuntimeWarning
+        If filepath does not end in '.json'
+    
+    """
+
+    if Path(filepath).suffix != '.json':
+        raise RuntimeWarning(
+            'Saving json probe to a file whose suffix is not .json. '
+            'kilosort.io.load_probe will not recognize this file.' 
+        )
+
+    d = probe_dict.copy()
+    # Convert arrays to lists, since arrays aren't json-able.
+    for k in list(d.keys()):
+        v = d[k]
+        if isinstance(v, np.ndarray):
+            d[k] = v.tolist()
+
+    # Verify that all lists are the same length.
+    length = None
+    for k, v in d.items():
+        if isinstance(v, list):
+            if length is None:
+                length = len(v)
+            elif length != len(v):
+                raise ValueError(
+                    f"All probe variables must have the same length."
+                )
+
+    # Create parent directories if they do not exist, then save probe.
+    Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+    with open(filepath, 'w') as f:
+        f.write(json.dumps(d))
 # =========================================================    
 # Sample calling program to get a metadata file from the user,
 # output a file set by outType

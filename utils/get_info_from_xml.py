@@ -1,6 +1,6 @@
 import os 
 import xml.etree.ElementTree as ET
-
+import numpy as np
 
 def get_all_channel_groups_from_xml(xml_file_path):
     '''
@@ -86,3 +86,23 @@ def get_subset_channels_from_xml(xml_file_path, region):
     if not region_channels:
         raise ValueError(f"No channels found in XML file. Searched for regions: {region_names}")
     return region_channels
+
+
+def get_channel_positions_from_xml(xml_file_path):
+    '''
+    Extracts the channel positions from the XML file
+    Args:
+        xml_file_path: Path to the XML file
+    Returns:
+        channel_positions: Array of shape (N, 2) containing x, y coordinates for each channel
+    '''
+    if not os.path.exists(xml_file_path):
+        raise FileNotFoundError(f"XML file {xml_file_path} does not exist")
+    
+    # parse XML file to extract channel positions
+    tree = ET.parse(xml_file_path)
+    root = tree.getroot()
+
+    channel_positions = np.array([[float(x) for x in root.find('channelPositions').find('x').text.split()],
+                                [float(y) for y in root.find('channelPositions').find('y').text.split()]]).T
+    return channel_positions

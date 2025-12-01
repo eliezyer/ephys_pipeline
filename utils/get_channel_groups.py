@@ -15,7 +15,8 @@ def get_channel_groups(coords, x_threshold=50, y_threshold=50):
         y_threshold: Maximum y-coordinate distance for grouping (default: 50)
     
     Returns:
-        List of lists, where each inner list contains indices belonging to the same group
+        List of lists, where each inner list contains indices belonging to the same group. 
+        Every channel group is sorted by y-coordinate (most superficial first)!!!!
     """
 
     
