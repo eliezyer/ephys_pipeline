@@ -38,8 +38,9 @@ import matlab.engine
 catgt_path = Path(r'C:\Users\Josue Regalado\Documents\EFO_temp_code\utils\J_CatGT-win\CatGT.exe')
 data_basepath = Path(r'C:\Users\Josue Regalado\ephys_temp_data')
 
-days_to_analyze = [ r'NPX1\11_29_25_O15',r'NPX2\11_29_25_O15',r'NPX3\11_29_25_O15']
-
+days_to_analyze = [r'NPX1\11_21_25_R1_T100']
+#r
+# needs to be spikesorted etc!
 sessions_to_analyze = None # if None, all sessions from that day will be included
 if sessions_to_analyze is None:
     analyze_all_sessions = True
@@ -47,11 +48,11 @@ else:
     analyze_all_sessions = False
 
 ################################ WHICH SECTIONS TO RUN #############################################
-run_catgt = True 
-generate_xml = False # generates an xml file for neuroscope, buzcode and for kilosort (only needed if channel groups are sorted or CAR separately)
+run_catgt = False 
+generate_xml = True # generates an xml file for neuroscope, buzcode and for kilosort (only needed if channel groups are sorted or CAR separately)
 spikesort = True 
 run_bombcell = True 
-run_buzcode = False # not fully implemented yet
+run_buzcode = True # only generate lfp works so far
 ###################################################################################################
 
 ######################## OPTIONS FOR XML FILE GENERATION ##################################
@@ -67,6 +68,12 @@ region_df_NPX1 = pd.DataFrame({
     'x': [50, 559, 300, 550, 27, 800, 309, 809, 809],
     'y': [200, 3870, 200, 200, 3795, 200, 3600, 3525, 3585],
     'region': ['TH', 'ACC', 'TH', 'TH', 'ACC', 'TH', 'ACC', 'ACC', 'ACC'],
+})
+# some initial sessions in NPX1 didn't have ACC sites
+region_df_NPX1_alt = pd.DataFrame({
+    'x': [50, 300, 550, 800],
+    'y': [200, 200, 200, 200],
+    'region': ['TH', 'TH', 'TH', 'TH'],
 })
 # below is for a NPX1 test recording (10_27_2025)
 # region_df_NPX1 = pd.DataFrame({
@@ -110,10 +117,10 @@ ks_th_learned = 7 # (default: 8) - lower this if few spikes are detected
 
 #################################### OPTIONS FOR BUZCODE ##########################################
 generate_lfp = True
-find_ripples = True
-find_SWRs = True # this will use existing ripples if present, otherwise it will detect them
+find_ripples = False
+find_SWRs = False # this will use existing ripples if present, otherwise it will detect them
 best_SW_channel = 44 # IMPLEMENT AUTO DETECTION OF BEST SW CHANNEL
-find_sleep_states = True
+find_sleep_states = False
 ###################################################################################################
 #%%
 for day in days_to_analyze: # loop through each day/session
@@ -122,26 +129,27 @@ for day in days_to_analyze: # loop through each day/session
     supercat_folder = Path(current_day_path, 'finalcat')
     if not os.path.exists(supercat_folder):
         os.mkdir(supercat_folder)
-
-    if analyze_all_sessions: # get all folder names from that day
-        sessions_to_analyze = [session for session in os.listdir(current_day_path) if os.path.isdir(Path(current_day_path, session))]
-
-    # exluce finalcat folder from sessions_to_analyze
-    sessions_to_analyze = np.array(sessions_to_analyze)
-    sessions_to_analyze = np.delete(sessions_to_analyze, np.where(sessions_to_analyze == 'finalcat')[0])
-    sessions_to_analyze = np.delete(sessions_to_analyze, np.where(sessions_to_analyze == 'finalcat_og')[0])
-    Recording_start_times = []
-    # sort sessions in chronological order 
-    for tmp_sess in sessions_to_analyze:
-        tmp_meta_file = list(Path(current_day_path, tmp_sess, tmp_sess +'_imec0').glob('*ap.meta'))[0]
-        tmp_meta_file = readMeta(tmp_meta_file)
-        Recording_start_times.append(tmp_meta_file['fileCreateTime'])
-    sessions_to_analyze = sessions_to_analyze[np.argsort(Recording_start_times)]
-    Recording_start_times = np.sort(Recording_start_times) # also sort the times because we will save them in a csv in case we need them later
-    dir_runs = []
-    for_cleanup = []
+    inside_supercat = False # flag storing whether we are in supercat subfolder 
     #%% running catgt on each session individually, then supercat to concatenate everything
     if run_catgt:
+        if analyze_all_sessions: # get all folder names from that day
+            sessions_to_analyze = [session for session in os.listdir(current_day_path) if os.path.isdir(Path(current_day_path, session))]
+
+        # exluce finalcat folder from sessions_to_analyze
+        sessions_to_analyze = np.array(sessions_to_analyze)
+        sessions_to_analyze = np.delete(sessions_to_analyze, np.where(sessions_to_analyze == 'finalcat')[0])
+        sessions_to_analyze = np.delete(sessions_to_analyze, np.where(sessions_to_analyze == 'finalcat_og')[0])
+        Recording_start_times = []
+        # sort sessions in chronological order 
+        for tmp_sess in sessions_to_analyze:
+            tmp_meta_file = list(Path(current_day_path, tmp_sess, tmp_sess +'_imec0').glob('*ap.meta'))[0]
+            tmp_meta_file = readMeta(tmp_meta_file)
+            Recording_start_times.append(tmp_meta_file['fileCreateTime'])
+        sessions_to_analyze = sessions_to_analyze[np.argsort(Recording_start_times)]
+        Recording_start_times = np.sort(Recording_start_times) # also sort the times because we will save them in a csv in case we need them later
+        dir_runs = []
+        for_cleanup = []
+
         # for loop, each session run
         for i, session in enumerate(sessions_to_analyze): # loop through each recording 
             run_name = session[:-3] # removes _g0
@@ -212,24 +220,14 @@ for day in days_to_analyze: # loop through each day/session
             for item_name in os.listdir(src_folder_1):
                 if not 't0.obx0.obx.bin' in item_name and not 't0.obx0.obx.meta' in item_name and not 'DS_Store' in item_name: # skip og bin and meta obx files
                     source_path = os.path.join(src_folder_1, item_name)
-                    destination_path = os.path.join(supercat_folder, item_name)
-                    shutil.move(source_path, destination_path)
+                    if os.path.isfile(source_path): # only move files, not folders
+                        destination_path = os.path.join(supercat_folder, item_name)
+                        shutil.move(source_path, destination_path)
+            inside_supercat = True # subfolder is already added to supercat path above
 
-        #     shutil.move(Path(current_day_path, session), supercat_folder) # move everything into final cat folder
-
-        #     # move items from imec0 folder into parent folder
-        #     supercat_folder_tmp1 = list(supercat_folder.glob("*g0"))[0]
-        #     supercat_folder_tmp2 = list(supercat_folder_tmp1.glob("*imec0"))[0]
-        #     for item_name in os.listdir(supercat_folder_tmp2):
-        #         if not 't0.imec0.ap.bin' in item_name and not 't0.imec0.ap' in item_name: # skip og bin and meta file 
-        #             source_path = os.path.join(supercat_folder_tmp2, item_name)
-        #             destination_path = os.path.join(supercat_folder_tmp1, item_name)
-        #             shutil.move(source_path, destination_path)
-        # shutil.rmtree(supercat_folder_tmp2, ) # remove folder containing og bin and meta file 
-        # os.remove(list(supercat_folder_tmp1.glob("*t0.obx0.obx.bin"))[0]) # remove og bin and meta obx files 
-        # os.remove(list(supercat_folder_tmp1.glob("*g0_t0.obx0.obx.meta"))[0]) # remove og bin and meta obx files 
-        # supercat_folder = list(supercat_folder.glob("*g0"))[0] # go into folder created in finalcat
-
+        if not inside_supercat:
+            supercat_folder = list(supercat_folder.glob("*g0"))[0] # go into folder created in finalcat
+            inside_supercat = True
 
         # remove 'supercat' from folder name - necessary to run catGT TTL extraction later....... 
         if 'supercat' in supercat_folder.stem:
@@ -257,26 +255,25 @@ for day in days_to_analyze: # loop through each day/session
             writer = csv.writer(file)
             writer.writerow(Recording_start_times)
 
-        # remove catgt files for individual sessions after supercat
-        for s in for_cleanup:   
-            temp_bin = list(s.glob("*tcat.imec0.ap.bin"))[0]
-            temp_meta = list(s.glob("*tcat.imec0.ap.meta"))[0] 
-            temp_catlog = list(s.glob("CatGT.log"))[0] 
-            temp_sync_file = list(s.glob("*.ap.xd*"))[0] 
-            os.remove(temp_bin)
-            os.remove(temp_meta)
-            os.remove(temp_catlog)
-            os.remove(temp_sync_file)   
+        if len(sessions_to_analyze) >1:
+            # remove catgt files for individual sessions after supercat
+            for s in for_cleanup:   
+                temp_bin = list(s.glob("*tcat.imec0.ap.bin"))[0]
+                temp_meta = list(s.glob("*tcat.imec0.ap.meta"))[0] 
+                temp_catlog = list(s.glob("CatGT.log"))[0] 
+                temp_sync_file = list(s.glob("*.ap.xd*"))[0] 
+                os.remove(temp_bin)
+                os.remove(temp_meta)
+                os.remove(temp_catlog)
+                os.remove(temp_sync_file)   
         
     if generate_xml:
-        try:
-            # load file ending in chanmap.json in supercat folder 
-            json_file_path = list(supercat_folder.glob('*chanmap.json'))[0]
-        except:
+        if not inside_supercat:
             supercat_folder = list(supercat_folder.glob("*g0"))[0] # go into folder created in finalcat
-            # load file ending in chanmap.json in supercat folder 
-            json_file_path = list(supercat_folder.glob('*chanmap.json'))[0]
+            inside_supercat = True
 
+        # load file ending in chanmap.json in supercat folder 
+        json_file_path = list(supercat_folder.glob('*chanmap.json'))[0]
         with open(json_file_path, 'r') as f:
             temp = json.load(f)
         # extract channel positions from json file
@@ -285,7 +282,7 @@ for day in days_to_analyze: # loop through each day/session
         if 'NPX1' in day:
             animal_name = 'NPX1'
             region_df = region_df_NPX1
-            y_lim_channel_groups = 10
+            y_lim_channel_groups = 16
         elif 'NPX2' in day:
             animal_name = 'NPX2'
             region_df = region_df_NPX2
@@ -295,34 +292,33 @@ for day in days_to_analyze: # loop through each day/session
             region_df = region_df_NPX3
             y_lim_channel_groups = 106
 
-        channel_groups, region_names = get_channel_groups_with_regions(channel_positions, region_df=region_df, 
-        x_threshold=x_lim_channel_groups, y_threshold=y_lim_channel_groups)
-
+        try: # might throw error for some npx sesions where no acc sites where selected 
+            channel_groups, region_names = get_channel_groups_with_regions(channel_positions, region_df=region_df, 
+            x_threshold=x_lim_channel_groups, y_threshold=y_lim_channel_groups)
+        except:
+            channel_groups, region_names = get_channel_groups_with_regions(channel_positions, region_df=region_df_NPX1_alt, 
+            x_threshold=x_lim_channel_groups, y_threshold=y_lim_channel_groups)
+        
         generate_xml_with_channel_groups(
             template_xml_path=template_xml_path,
-            output_xml_path=Path(supercat_folder, 'neuroscope.xml'),
+            output_xml_path=Path(supercat_folder, str(supercat_folder.stem)+ '.xml'),
             channel_groups=channel_groups,
             group_regions=region_names,
             channel_positions=channel_positions,
         )
-        print(f"Successfully generated XML file: {Path(supercat_folder, 'neuroscope.xml')}")
+        print(f"Successfully generated XML file: {Path(supercat_folder, supercat_folder.stem,'.xml')}")
 
     if spikesort:
             
             if car_separately or sort_seperatly: # don't need channel groups if everything is run together 
-                try:
-                    xml_file_path = Path(supercat_folder, 'neuroscope.xml')
-                    region_channels = get_all_channel_groups_from_xml(xml_file_path) # returns a dict with region names associated with channels
-                    catgt_meta_file = list(supercat_folder.glob('*ap.meta'))[0]
-                    _ = MetaToCoords(metaFullPath=Path(catgt_meta_file), destFullPath=str(supercat_folder), outType=5, showPlot=False) # outType 5 is for kilosort json
-
-                except: 
+                if not inside_supercat:
                     supercat_folder = list(supercat_folder.glob("*g0"))[0] # go into folder created in finalcat
-                    xml_file_path = Path(supercat_folder, 'neuroscope.xml')
-                    region_channels = get_all_channel_groups_from_xml(xml_file_path) # returns a dict with region names associated with channels
-                    catgt_meta_file = list(supercat_folder.glob('*ap.meta'))[0]
-                    _ = MetaToCoords(metaFullPath=Path(catgt_meta_file), destFullPath=str(supercat_folder), outType=5, showPlot=False) # outType 5 is for kilosort json
+                    inside_supercat = True
 
+                xml_file_path = list(supercat_folder.glob("*.xml"))[0]
+                region_channels = get_all_channel_groups_from_xml(xml_file_path) # returns a dict with region names associated with channels
+                catgt_meta_file = list(supercat_folder.glob('*ap.meta'))[0]
+                _ = MetaToCoords(metaFullPath=Path(catgt_meta_file), destFullPath=str(supercat_folder), outType=5, showPlot=False) # outType 5 is for kilosort json
                 region_channels_list = list(region_channels.values()) # just need a list for kilosort
                 region_names = list(region_channels.keys())
             else:
@@ -353,17 +349,18 @@ for day in days_to_analyze: # loop through each day/session
             probe_dict = load_probe(supercat_folder / probe_file_name)
             if sort_seperatly:
                 for i in range(len(region_channels_list)):
-                    # exclude all channel groups except the current one 
-                    bad_channels = region_channels_list[:i] + region_channels_list[i+1:]
-                    # make sure its a 1d list 
-                    bad_channels = [item for sublist in bad_channels for item in sublist]
+                    if not ('NPX1' in day and i > 0):
+                        # exclude all channel groups except the current one 
+                        bad_channels = region_channels_list[:i] + region_channels_list[i+1:]
+                        # make sure its a 1d list 
+                        bad_channels = [item for sublist in bad_channels for item in sublist]
 
-                    # setting kilosort folder name
-                    date_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    ks_folder_save_name = supercat_folder / Path('kilosort4_'+date_time + '_' + region_names[i])
-                    # running kilosort
-                    ops, st, clu, tF, Wall, similar_templates, is_ref, est_contam_rate, kept_spikes = \
-                        run_kilosort(settings=settings, probe=probe_dict,results_dir=ks_folder_save_name, bad_channels = bad_channels)
+                        # setting kilosort folder name
+                        date_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        ks_folder_save_name = supercat_folder / Path('kilosort4_'+date_time + '_' + region_names[i])
+                        # running kilosort
+                        ops, st, clu, tF, Wall, similar_templates, is_ref, est_contam_rate, kept_spikes = \
+                            run_kilosort(settings=settings, probe=probe_dict,results_dir=ks_folder_save_name, bad_channels = bad_channels)
             else:
                 # setting kilosort folder name
                     date_time = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -384,9 +381,6 @@ for day in days_to_analyze: # loop through each day/session
         ## Provide raw and meta files
         ## Leave 'None' if no raw data. Ideally, your raw data is common-average-referenced and
         # the channels are temporally aligned to each other (this can be done with CatGT)
-        #raw_file_path =  r"C:\Users\Josue Regalado\ephys_temp_data\NPX3\11_17_25_P1\finalcat_og\NPX3_11_17_25_training_CA_TH_g0\NPX3_11_17_25_training_CA_TH_g0_tcat.imec0.ap.bin" # "/home/jf5479/cup/Julie/from_Yunchang/20250411_4423_antibody_maze_C1/CatGT_out/catgt_20250411_4423_C1_g0/20250411_4423_C1_g0_imec0/20250411_4423_C1_g0_tcat.imec0.ap.bin" #None#"/home/julie/Dropbox/Example datatsets/JF093_2023-03-09_site1/site1/2023-03-09_JF093_g0_t0_bc_decompressed.imec0.ap.bin" # ks_dir
-        #meta_file_path = r"C:\Users\Josue Regalado\ephys_temp_data\NPX3\11_17_25_P1\finalcat_og\NPX3_11_17_25_training_CA_TH_g0\NPX3_11_17_25_training_CA_TH_g0_tcat.imec0.ap.meta" # "/home/jf5479/cup/Julie/from_Yunchang/20250411_4423_antibody_maze_C1/CatGT_out/catgt_20250411_4423_C1_g0/20250411_4423_C1_g0_imec0/20250411_4423_C1_g0_tcat.imec0.ap.meta" #None#"/home/julie/Dropbox/Example datatsets/JF093_2023-03-09_site1/site1/2023-03-09_JF093_g0_t0_bc_decompressed.imec0.ap.bin"None#"/home/julie/Dropbox/Example datatsets/JF093_2023-03-09_site1/site1/2023-03-09_JF093_g0_t0.imec0.ap.meta"
-        ## Get default parameters - we will see later in the notebook how to assess and fine-tune these
         meta_file_path = None
         raw_file_path = None
         param = bc.get_default_parameters(ks_folder_save_name, 
@@ -424,26 +418,30 @@ for day in days_to_analyze: # loop through each day/session
     if run_buzcode:
         eng = matlab.engine.start_matlab() # start matlab engine
         eng.addpath(eng.genpath('utils/buzcode/')) # add matlab functions to path
-        try:
-            catgt_binary_file = list(supercat_folder.glob("*.ap.bin"))[0]
-        except:
+        if not inside_supercat: 
             supercat_folder = list(supercat_folder.glob("*g0"))[0] # go into folder created in finalcat
-            catgt_binary_file = list(supercat_folder.glob("*tcat.imec0.ap.bin"))[0] # supercat bin file
+            inside_supercat = True
+
+        catgt_binary_file = list(supercat_folder.glob("*.ap.bin"))[0]
         basename = Path(supercat_folder, supercat_folder.stem[:-3]) # supercat folder + run name
         if generate_lfp:
         # generate LFP at 1250Hz
-            eng.ResampleBinary(catgt_binary_file, basename+'_1250Hz.lfp',385,1,24, nargout=0) #30000 Hz to 1250 Hz
-            print(f"Successfully generated LFP file: {basename+'_1250Hz.lfp'}")
+            try:
+                eng.ResampleBinary(str(catgt_binary_file), str(basename) + '_g0.lfp',385,1,24, nargout=0) #30000 Hz to 1250 Hz
+                #print(f"Successfully generated LFP file: {basename+'_1250Hz.lfp'}")
+                print('lfp successfully generated')
+            except:
+                print('lfp could not be generated')
         # check if lfp file exists because it is needed for the rest of the functions
 
-        if not os.path.exists(basename+'_1250Hz.lfp'):
-            raise FileNotFoundError(f"LFP file {basename+'_1250Hz.lfp'} does not exist")
-        # load lfp 
-        lfp = eng.bz_GetLFP( 'all', 'basepath', str(supercat_folder), 'noPrompts', True)
+        # if not os.path.exists(basename+'_1250Hz.lfp'):
+        #     raise FileNotFoundError(f"LFP file {basename+'_1250Hz.lfp'} does not exist")
+        # # load lfp 
+        # lfp = eng.bz_GetLFP( 'all', 'basepath', str(supercat_folder), 'noPrompts', True)
         
         if find_ripples:
             # check that xml file exists (to get channel numbers)
-            xml_file_path = Path(supercat_folder, 'neuroscope.xml')
+            xml_file_path = list(supercat_folder.glob("*.xml"))[0]
             if not os.path.exists(xml_file_path):
                 raise FileNotFoundError(f"XML file {xml_file_path} does not exist")            
 
@@ -484,7 +482,7 @@ for day in days_to_analyze: # loop through each day/session
             if not os.path.exists(basename+'_1250Hz.lfp'):
                 raise FileNotFoundError(f"LFP file {basename+'_1250Hz.lfp'} does not exist")
             # check that xml file exists (to get channel numbers)
-            xml_file_path = Path(supercat_folder, 'neuroscope.xml')
+            xml_file_path = list(supercat_folder.glob("*.xml"))[0]
             if not os.path.exists(xml_file_path):
                 raise FileNotFoundError(f"XML file {xml_file_path} does not exist")            
             hpc_channels = get_subset_channels_from_xml(xml_file_path, region='hpc')
@@ -494,6 +492,7 @@ for day in days_to_analyze: # loop through each day/session
             SW_channel = eng.bz_GetBestSharpWaveChan(lfp, 385, 1250.0, ripple_channel, channel_positions)
             print(f"Best ripple channel: {int(ripple_channel)}")
             print(f"Best SW channel: {best_SW_channel}")
+
             # TESTED UNTIL HERE
             #  Channels:     an array of two channel IDs following LoadBinary format (base 1)
             #                First RIPPLE channel, and second the SHARP WAVE channel.
@@ -566,7 +565,7 @@ for day in days_to_analyze: # loop through each day/session
             if not os.path.exists(basename+'_1250Hz.lfp'):
                 raise FileNotFoundError(f"LFP file {basename+'_1250Hz.lfp'} does not exist")
             # check that xml file exists (to get channel numbers)
-            xml_file_path = Path(str(basepath.parent), animal_name, 'neuroscope.xml')
+            xml_file_path = list(supercat_folder.glob("*.xml"))[0]
 
             # finds channels for HPC > CTX > TH for SW and theta channels 
             region_channels = get_subset_channels_from_xml(xml_file_path, region='all')

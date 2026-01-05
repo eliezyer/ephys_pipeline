@@ -31,3 +31,39 @@
 [Thd 11160 CPU 2 12/11/25 14:16:54.870] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_29_25_O15/finalcat -run=NPX3_11_29_25_offline_CA_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
 [Thd 11160 CPU 2 12/11/25 14:16:58.856] Done obx0: tcat.
 [Thd 11160 CPU 2 12/11/25 14:16:58.858] 
+[Thd 39188 CPU 2 12/11/25 21:45:00.632] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX1/11_29_25_O15/finalcat -run=NPX1_11_29_25_offline_ACC_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 39188 CPU 2 12/11/25 21:45:04.655] Done obx0: tcat.
+[Thd 39188 CPU 2 12/11/25 21:45:04.669] 
+[Thd 24032 CPU 7 12/13/25 23:56:50.583] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX2/11_29_25_O15/finalcat -run=NPX2_11_29_25_offline_ACC_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 24032 CPU 2 12/13/25 23:56:54.550] Done obx0: tcat.
+[Thd 24032 CPU 2 12/13/25 23:56:54.550] 
+[Thd 39344 CPU 2 12/14/25 09:11:16.497] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_29_25_O15/finalcat -run=NPX3_11_29_25_offline_CA_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 39344 CPU 2 12/14/25 09:11:21.369] Done obx0: tcat.
+[Thd 39344 CPU 2 12/14/25 09:11:21.385] 
+[Thd 22160 CPU 2 12/18/25 18:39:24.214] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX1/11_12_25/finalcat -run=NPX1_11_12_25_offline_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 22160 CPU 2 12/18/25 18:39:28.686] Done obx0: tcat.
+[Thd 22160 CPU 2 12/18/25 18:39:28.686] 
+[Thd 49104 CPU 2 12/19/25 11:07:24.390] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX1/11_13_25/finalcat -run=NPX1_11_13_25_offline_ACC_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 49104 CPU 2 12/19/25 11:07:28.615] Done obx0: tcat.
+[Thd 49104 CPU 2 12/19/25 11:07:28.615] 
+[Thd 39972 CPU 2 12/20/25 03:30:20.007] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX2/11_12_25/finalcat -run=NPX2_11_12_25_offline_ACC_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 39972 CPU 2 12/20/25 03:30:23.406] Done obx0: tcat.
+[Thd 39972 CPU 2 12/20/25 03:30:23.408] 
+[Thd 42024 CPU 2 12/20/25 13:33:27.688] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX2/11_13_25/finalcat -run=NPX2_11_13_25_offline_ACC_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 42024 CPU 2 12/20/25 13:33:32.204] Done obx0: tcat.
+[Thd 42024 CPU 2 12/20/25 13:33:32.204] 
+[Thd 11368 CPU 2 12/20/25 16:01:53.936] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_12_25/finalcat -run=NPX3_11_12_25_offline_CA_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 11368 CPU 2 12/20/25 16:01:59.085] Done obx0: tcat.
+[Thd 11368 CPU 4 12/20/25 16:01:59.097] 
+[Thd 47260 CPU 2 12/20/25 18:03:40.291] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX3/11_13_25/finalcat -run=NPX3_11_13_25_offline2_CA_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 47260 CPU 2 12/20/25 18:03:40.657] Done obx0: tcat.
+[Thd 47260 CPU 2 12/20/25 18:03:40.657] 
+[Thd 24728 CPU 2 12/28/25 12:50:44.197] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX1/12_11_25_O20/finalcat -run=NPX1_12_11_25_offline_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 24728 CPU 2 12/28/25 12:50:49.103] Done obx0: tcat.
+[Thd 24728 CPU 10 12/28/25 12:50:49.120] 
+[Thd 15768 CPU 2 12/28/25 17:01:00.667] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX2/12_11_25_O20/finalcat -run=NPX2_12_11_25_offline_ACC_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 15768 CPU 2 12/28/25 17:01:05.182] Done obx0: tcat.
+[Thd 15768 CPU 2 12/28/25 17:01:05.182] 
+[Thd 15856 CPU 4 12/28/25 23:40:36.268] Cmdline: CatGT -dir=C:/Users/Josue Regalado/ephys_temp_data/NPX3/12_11_25_O20/finalcat -run=NPX3_12_11_25_offline_CA_TH -g=0 -t=cat -ob -obx=0 -xd=1,0,5,0,0 -xd=1,0,5,1,0 -xd=1,0,5,2,0 -xd=1,0,5,3,0 -xid=1,0,5,4,0
+[Thd 15856 CPU 2 12/28/25 23:40:40.844] Done obx0: tcat.
+[Thd 15856 CPU 2 12/28/25 23:40:40.844] 
